@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Sim Lab - Linear Regression Fitting</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #eef2f6;
+    }
+
+    /* Grid pattern background matching mockup */
+    .grid-bg {
+      background-size: 20px 20px;
+      background-image: 
+        linear-gradient(to right, rgba(200, 210, 225, 0.4) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(200, 210, 225, 0.4) 1px, transparent 1px);
+    }
+
+    /* Yellow sticky notes styling */
+    .sticky-note {
+      background-color: #fff6a5;
+      border-left: 4px solid #f6e05e;
+      box-shadow: 2px 3px 8px rgba(0,0,0,0.06);
+    }
+
+    /* Custom range slider thumb styling */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Code block scrollbar */
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen grid-bg text-gray-800 flex flex-col justify-between">
+
+  <!-- Navigation Header -->
+  <header class="bg-[#1e293b] text-white px-6 py-3 flex items-center justify-between shadow-md">
+    <div class="flex items-center space-x-3">
+      <div class="w-4 h-4 rounded-full bg-white flex items-center justify-center">
+        <div class="w-2 h-2 rounded-full bg-[#1e293b]"></div>
+      </div>
+      <span class="font-bold text-lg tracking-wide">AI Sim Lab</span>
+    </div>
+
+    <!-- Middle Tabs -->
+    <nav class="hidden md:flex space-x-1 bg-[#0f172a]/50 p-1 rounded-full text-sm font-medium">
+      <button id="nav-simulate" class="bg-[#3b82f6] text-white px-5 py-1.5 rounded-full font-semibold transition">Simulate</button>
+      <button class="text-gray-300 hover:text-white px-4 py-1.5 rounded-full transition"><a href="./dataset.html">Dataset</a></button>
+      <button class="text-gray-300 hover:text-white px-4 py-1.5 rounded-full transition">Models</button>
+      <button class="text-gray-300 hover:text-white px-4 py-1.5 rounded-full transition">Learn</button>
+    </nav>
+
+    <!-- Right User Controls -->
+    <div class="flex items-center space-x-3">
+      <button class="w-8 h-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-xs text-gray-200 transition">
+        ?
+      </button>
+      <div class="w-9 h-9 rounded-full bg-amber-500 text-slate-900 font-bold text-xs flex items-center justify-center border-2 border-slate-600">
+        JD
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workbench Container -->
+  <main class="max-w-[1600px] mx-auto p-4 md:p-6 w-full flex-grow">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT WORKBENCH AREA (Panels 1, 2, 4, 3) -->
+      <div class="lg:col-span-9 grid grid-cols-1 md:grid-cols-12 gap-5">
+
+        <!-- ================= PANEL 1: SETUP ================= -->
+        <div class="md:col-span-4 bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-4">
+          <div>
+            <h2 class="font-bold text-gray-900 text-base mb-4">1. Setup</h2>
+            <input type="file" id="csvFileInput" accept=".csv" />
+            <!-- Dataset Selection -->
+            <div class="mb-4">
+              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Dataset</label>
+              <div class="relative">
+                <select id="dataset-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-sm font-medium text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="ad_spend">Ad spend vs Sales (7 points)</option>
+                  
+                </select>
+                <i class="fa-solid font-bold fa-chevron-down absolute right-3 top-3 text-xs text-gray-400 pointer-events-none"></i>
+              </div>
+            </div>
+
+            <!-- Model Type Toggle Buttons -->
+            <div class="mb-4">
+              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Model type</label>
+              <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold text-gray-600">
+                <button id="btn-model-linear" class="py-1.5 rounded-md transition text-center hover:text-gray-900">Linear</button>
+                <button id="btn-model-poly" class="py-1.5 rounded-md bg-[#3b82f6] text-white shadow-sm font-bold text-center">Polynomial</button>
+                <button id="btn-model-exp" class="py-1.5 rounded-md transition text-center hover:text-gray-900">Exponential</button>
+              </div>
+            </div>
+
+            <!-- Degree Slider -->
+            <div class="mb-5">
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-semibold text-gray-600">Degree: <span id="degree-val" class="font-bold text-gray-900">1</span></label>
+              </div>
+              <input type="range" id="degree-slider" min="1" max="6" value="1" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+              <div class="flex justify-between text-[10px] text-gray-400 mt-1 font-mono">
+                <span>1 (Linear)</span>
+                <span>3</span>
+                <span>6 (High degree)</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-2">
+              <button id="btn-fit" class="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center space-x-2 text-sm">
+                <i class="fa-solid fa-play text-xs"></i>
+                <span>Fit line</span>
+              </button>
+              
+              <div class="grid grid-cols-2 gap-2">
+                <button id="btn-reset" class="bg-slate-50 hover:bg-slate-100 text-gray-700 border border-slate-200 font-semibold py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center space-x-1">
+                  <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                  <span>Reset Model</span>
+                </button>
+                <button id="btn-sample" class="bg-slate-50 hover:bg-slate-100 text-gray-700 border border-slate-200 font-semibold py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center space-x-1">
+                  <i class="fa-solid fa-[#10b981] fa-shuffle text-[10px]"></i>
+                  <span>Sample Data</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Tip Box -->
+          <div class="bg-amber-50/80 border border-amber-200/80 rounded-lg p-3 text-xs text-amber-900 flex items-start space-x-2 mt-4">
+            <span class="text-amber-500 font-bold text-sm leading-none">💡</span>
+            <p id="tip-text" class="leading-relaxed">
+              <strong>Tip:</strong> Increasing the degree allows the model to capture complex curves, but higher degrees (4+) may overfit noisy datasets!
+            </p>
+          </div>
+        </div>
+
+        <!-- ================= PANEL 2: WATCH IT FIT & PANEL 4: TEST IT ================= -->
+        <div class="md:col-span-8 flex flex-col space-y-5">
+          
+          <!-- PANEL 2: Watch it fit -->
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex-grow flex flex-col justify-between">
+            <div>
+              <!-- Header & Status Pill -->
+              <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-gray-900 text-base">2. Watch it fit</h2>
+                <div class="bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-3 py-1 rounded-full text-xs font-semibold flex items-center space-x-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span id="status-badge">Fitted · Standard Least Squares</span>
+                </div>
+              </div>
+
+              <!-- Main Scatter Plot Canvas -->
+              <div class="relative w-full h-64 bg-slate-50 border border-slate-200 rounded-lg p-2 overflow-hidden flex items-center justify-center">
+                <canvas id="fit-canvas" class="w-full h-full cursor-crosshair"></canvas>
+              </div>
+            </div>
+
+            <!-- Legend & Interactive Hints -->
+            <div class="flex flex-wrap items-center justify-between text-xs text-gray-500 mt-3 pt-2 border-t border-slate-100 gap-2">
+              <div class="flex items-center space-x-4">
+                <span class="flex items-center space-x-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
+                  <span>Data points</span>
+                </span>
+                <span class="flex items-center space-x-1.5">
+                  <span class="w-4 h-0.5 bg-emerald-500 inline-block"></span>
+                  <span>Fitted curve</span>
+                </span>
+                <span class="flex items-center space-x-1.5">
+                  <span class="w-3 border-t border-dashed border-red-400 inline-block"></span>
+                  <span>Residual error</span>
+                </span>
+              </div>
+              <div class="text-[11px] text-gray-400 font-mono">
+                Click plot to add/remove points
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= PANEL 4: TEST IT ================= -->
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+            <h2 class="font-bold text-gray-900 text-sm mb-3">4. Test it</h2>
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+              <div class="relative w-full sm:w-2/3">
+                <input type="text" id="predict-input" value="10" placeholder="Enter x value (e.g. 10)" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                <span class="absolute right-3 top-2.5 text-xs text-gray-400 font-mono">x unit</span>
+              </div>
+
+              <button id="btn-predict" class="w-full sm:w-auto bg-[#3b82f6] hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-sm whitespace-nowrap">
+                Predict
+              </button>
+
+              <div id="predict-result" class="w-full sm:w-auto flex-grow bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg py-2 px-3 text-xs font-semibold flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-chart-line text-emerald-600"></i>
+                <span id="predict-text">y ≈ 18.2</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ================= PANEL 3: RESULTS (Right Side of Workbench) ================= -->
+      <div class="lg:col-span-3 bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-4">
+        <div>
+          <h2 class="font-bold text-gray-900 text-base mb-4">3. Results</h2>
+
+          <!-- Metric Cards Grid -->
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <!-- R2 Score Card -->
+            <div class="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 text-center">
+              <span class="text-[11px] font-semibold text-gray-500 block uppercase">R² Score</span>
+              <div id="metric-r2" class="text-2xl font-extrabold text-emerald-600 my-0.5">0.94</div>
+              <div id="metric-r2-sub" class="text-[10px] font-semibold text-emerald-700 flex items-center justify-center space-x-0.5">
+                <span>▲ +0.12 vs linear</span>
+              </div>
+            </div>
+
+            <!-- MSE Error Card -->
+            <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-3 text-center">
+              <span class="text-[11px] font-semibold text-gray-500 block uppercase">MSE (error)</span>
+              <div id="metric-mse" class="text-2xl font-extrabold text-amber-600 my-0.5">1.80</div>
+              <div class="text-[10px] font-semibold text-amber-700 flex items-center justify-center space-x-0.5">
+                <span>▼ Error minimized</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Residuals per point Bar Chart -->
+          <div class="mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-semibold text-gray-700">Residuals per point</span>
+              <span class="text-[10px] text-gray-400 font-mono">Abs Error (|y - ŷ|)</span>
+            </div>
+            <div class="h-28 w-full bg-slate-50 border border-slate-100 rounded-lg p-2 flex items-end justify-between space-x-1" id="residuals-chart">
+              <!-- Dynamically Populated Bars -->
+            </div>
+          </div>
+
+          <!-- Activity Log Terminal -->
+          <div>
+            <span class="text-xs font-semibold text-gray-700 block mb-1.5">Activity log</span>
+            <div id="activity-log" class="bg-[#0f172a] text-emerald-400 font-mono text-[11px] p-3 rounded-lg h-32 overflow-y-auto custom-scroll leading-relaxed space-y-1 border border-slate-800">
+              <p class="text-gray-400">> System ready.</p>
+              <p class="text-gray-400">> Select parameters and fit model.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Report Button -->
+        <button id="btn-export" class="w-full bg-white hover:bg-slate-50 text-blue-600 border border-blue-200 font-semibold py-2 px-4 rounded-lg text-xs transition shadow-sm flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-arrow-down-long text-[11px]"></i>
+          <span>Export report</span>
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Data Presets for Domain
+    // Ensure DATASETS retains its object structure
+    let DATASETS = {
+      ad_spend: {
+        title: "Ad spend vs Sales",
+        xLabel: "Ad Spend ($k)",
+        yLabel: "Sales ($k)",
+        data: [
+          { x: 1, y: 2.2 },
+          { x: 2, y: 3.8 },
+          { x: 3, y: 4.5 },
+          { x: 4, y: 7.0 },
+          { x: 5, y: 8.5 },
+          { x: 6, y: 10.8 },
+          { x: 7, y: 14.2 }
+        ]
+      },
+      housing: {
+        title: "Housing Prices vs Size",
+        xLabel: "Size (100 sq ft)",
+        yLabel: "Price ($k)",
+        data: [
+          { x: 10, y: 150 },
+          { x: 12, y: 180 },
+          { x: 15, y: 230 },
+          { x: 18, y: 240 },
+          { x: 20, y: 310 },
+          { x: 22, y: 330 },
+          { x: 25, y: 390 },
+          { x: 28, y: 420 }
+        ]
+      },
+      runge: {
+  title: "Runge's Phenomenon (Oscillation Test)",
+  xLabel: "x (-1 to 1)",
+  yLabel: "y = 1 / (1 + 25x²)",
+  data: [
+    { x: -1.0, y: 0.0385 },
+    { x: -0.8, y: 0.0588 },
+    { x: -0.6, y: 0.1000 },
+    { x: -0.4, y: 0.2000 },
+    { x: -0.2, y: 0.5000 },
+    { x:  0.0, y: 1.0000 },
+    { x:  0.2, y: 0.5000 },
+    { x:  0.4, y: 0.2000 },
+    { x:  0.6, y: 0.1000 },
+    { x:  0.8, y: 0.0588 },
+    { x:  1.0, y: 0.0385 }
+  ]
+}
+    };
+    // Application State
+    let currentDatasetKey = "ad_spend";
+    let activePoints = [...DATASETS.ad_spend.data];
+    let modelType = "poly"; // "linear", "poly", "exp"
+    let polyDegree = 1;
+    let fittedCoeffs = [];
+    let linearR2 = null;
+
+    // DOM Elements
+    const datasetSelect = document.getElementById("dataset-select");
+    const btnModelLinear = document.getElementById("btn-model-linear");
+    const btnModelPoly = document.getElementById("btn-model-poly");
+    const btnModelExp = document.getElementById("btn-model-exp");
+    const degreeSlider = document.getElementById("degree-slider");
+    const degreeVal = document.getElementById("degree-val");
+    const btnFit = document.getElementById("btn-fit");
+    const btnReset = document.getElementById("btn-reset");
+    const btnSample = document.getElementById("btn-sample");
+    const canvas = document.getElementById("fit-canvas");
+    const ctx = canvas.getContext("2d");
+    const predictInput = document.getElementById("predict-input");
+    const btnPredict = document.getElementById("btn-predict");
+    const predictResultText = document.getElementById("predict-text");
+    const metricR2 = document.getElementById("metric-r2");
+    const metricR2Sub = document.getElementById("metric-r2-sub");
+    const metricMSE = document.getElementById("metric-mse");
+    const residualsChart = document.getElementById("residuals-chart");
+    const activityLog = document.getElementById("activity-log");
+    const tipText = document.getElementById("tip-text");
+    const btnExport = document.getElementById("btn-export");
+
+    // Matrix Least Squares Solver for Polynomial Regression
+    function solvePolynomialRegression(pts, degree) {
+      if (pts.length === 0) return [];
+      const n = pts.length;
+      const deg = Math.min(degree, n - 1); // Avoid underdetermined system
+
+      // Build X matrix and Y vector
+      let X = [];
+      let Y = [];
+      for (let i = 0; i < n; i++) {
+        let row = [];
+        for (let j = 0; j <= deg; j++) {
+          row.push(Math.pow(pts[i].x, j));
+        }
+        X.push(row);
+        Y.push(pts[i].y);
+      }
+
+      // Compute (X^T * X) and (X^T * Y)
+      const cols = deg + 1;
+      let XtX = Array(cols).fill(0).map(() => Array(cols).fill(0));
+      let XtY = Array(cols).fill(0);
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < cols; j++) {
+          let sum = 0;
+          for (let k = 0; k < n; k++) {
+            sum += X[k][i] * X[k][j];
+          }
+          XtX[i][j] = sum;
+        }
+        let sumY = 0;
+        for (let k = 0; k < n; k++) {
+          sumY += X[k][i] * Y[k];
+        }
+        XtY[i] = sumY;
+      }
+
+      // Solve XtX * C = XtY via Gaussian Elimination
+      return gaussianElimination(XtX, XtY);
+    }
+
+    function gaussianElimination(A, B) {
+      let n = B.length;
+      for (let i = 0; i < n; i++) {
+        // Find pivot
+        let maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+          if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) {
+            maxRow = k;
+          }
+        }
+        // Swap
+        let tmp = A[i]; A[i] = A[maxRow]; A[maxRow] = tmp;
+        let t = B[i]; B[i] = B[maxRow]; B[maxRow] = t;
+
+        // Singular check
+        if (Math.abs(A[i][i]) < 1e-12) continue;
+
+        // Eliminate
+        for (let k = i + 1; k < n; k++) {
+          let c = -A[k][i] / A[i][i];
+          for (let j = i; j < n; j++) {
+            if (i === j) A[k][j] = 0;
+            else A[k][j] += c * A[i][j];
+          }
+          B[k] += c * B[i];
+        }
+      }
+
+      // Back substitution
+      let x = Array(n).fill(0);
+      for (let i = n - 1; i >= 0; i--) {
+        let sum = B[i];
+        for (let j = i + 1; j < n; j++) {
+          sum -= A[i][j] * x[j];
+        }
+        x[i] = (Math.abs(A[i][i]) < 1e-12) ? 0 : sum / A[i][i];
+      }
+      return x;
+    }
+
+    // Model Prediction Evaluator
+    function predictY(xVal) {
+      if (!fittedCoeffs || fittedCoeffs.length === 0) return 0;
+
+      if (modelType === "exp") {
+        // Exponential approximation: y = a * e^(b*x)
+        const a = fittedCoeffs[0] || 1;
+        const b = fittedCoeffs[1] || 0.1;
+        return a * Math.exp(b * xVal);
+      }
+
+      // Polynomial
+      let yHat = 0;
+      for (let j = 0; j < fittedCoeffs.length; j++) {
+        yHat += fittedCoeffs[j] * Math.pow(xVal, j);
+      }
+      return yHat;
+    }
+
+    // Calculate Model Statistics (MSE & R2)
+    function calculateMetrics() {
+      if (activePoints.length === 0) return { mse: 0, r2: 0, residuals: [] };
+
+      const yMean = activePoints.reduce((sum, p) => sum + p.y, 0) / activePoints.length;
+      let ssTot = 0;
+      let ssRes = 0;
+      let residuals = [];
+
+      activePoints.forEach(p => {
+        const yHat = predictY(p.x);
+        const res = p.y - yHat;
+        residuals.push({ point: p, res: res, absRes: Math.abs(res) });
+        ssRes += res * res;
+        ssTot += Math.pow(p.y - yMean, 2);
+      });
+
+      const mse = ssRes / activePoints.length;
+      let r2 = ssTot === 0 ? 1 : 1 - (ssRes / ssTot);
+      if (r2 < 0) r2 = 0; // clamp for UI readability
+
+      return { mse, r2, residuals };
+    }
+
+    // Fit & Render Canvas
+    function runFittingProcess(logMessage = true) {
+      if (modelType === "linear") {
+        polyDegree = 1;
+        degreeSlider.value = 1;
+        degreeVal.textContent = "1";
+        fittedCoeffs = solvePolynomialRegression(activePoints, 1);
+      } else if (modelType === "poly") {
+        fittedCoeffs = solvePolynomialRegression(activePoints, polyDegree);
+      } else if (modelType === "exp") {
+        // Simple log linear fit for exponential
+        const posPts = activePoints.map(p => ({ x: p.x, y: Math.log(Math.max(p.y, 0.01)) }));
+        const linCoeffs = solvePolynomialRegression(posPts, 1);
+        fittedCoeffs = [Math.exp(linCoeffs[0]), linCoeffs[1]];
+      }
+
+      // Keep track of degree 1 linear baseline for delta metric
+      if (polyDegree === 1 || linearR2 === null) {
+        const baseMetrics = calculateMetrics();
+        linearR2 = baseMetrics.r2;
+      }
+
+      const { mse, r2, residuals } = calculateMetrics();
+
+      // Update UI Metrics
+      metricR2.textContent = r2.toFixed(2);
+      metricMSE.textContent = mse.toFixed(2);
+
+      const delta = r2 - (linearR2 || r2);
+      if (delta >= 0) {
+        metricR2Sub.className = "text-[10px] font-semibold text-emerald-700 flex items-center justify-center space-x-0.5";
+        metricR2Sub.innerHTML = `<span>▲ +${delta.toFixed(2)} vs linear</span>`;
+      } else {
+        metricR2Sub.className = "text-[10px] font-semibold text-amber-700 flex items-center justify-center space-x-0.5";
+        metricR2Sub.innerHTML = `<span>▼ ${delta.toFixed(2)} vs linear</span>`;
+      }
+
+      // Render Plot & Residual Bars
+      drawPlot(residuals);
+      renderResidualsChart(residuals);
+
+      // Evaluate active test input
+      executePrediction();
+
+      if (logMessage) {
+        let eqStr = "";
+        if (modelType === "linear") eqStr = `y = ${fittedCoeffs[1]?.toFixed(2)}x + ${fittedCoeffs[0]?.toFixed(2)}`;
+        else if (modelType === "poly") eqStr = `Poly Deg ${polyDegree} fitted`;
+        else eqStr = `y = ${fittedCoeffs[0]?.toFixed(2)} * e^(${fittedCoeffs[1]?.toFixed(2)}x)`;
+
+        addLog(`Fit done: R² = ${r2.toFixed(2)} | MSE = ${mse.toFixed(2)}`);
+        addLog(`Model equation: ${eqStr}`);
+      }
+    }
+
+    // Draw Scatter Plot and Regression Curve on Canvas
+    function drawPlot(residuals) {
+      // Handle canvas retina scale
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (activePoints.length === 0) return;
+
+      // Padding
+      const pad = 35;
+
+      // Find Bounds
+      let xMin = Math.min(...activePoints.map(p => p.x));
+      let xMax = Math.max(...activePoints.map(p => p.x));
+      let yMin = Math.min(...activePoints.map(p => p.y));
+      let yMax = Math.max(...activePoints.map(p => p.y));
+
+      // Expand bounds slightly for visual polish
+      const xSpan = (xMax - xMin) || 10;
+      const ySpan = (yMax - yMin) || 10;
+      xMin = Math.max(0, xMin - xSpan * 0.15);
+      xMax = xMax + xSpan * 0.15;
+      yMin = Math.max(0, yMin - ySpan * 0.15);
+      yMax = yMax + ySpan * 0.15;
+
+      const toScreenX = (x) => pad + ((x - xMin) / (xMax - xMin)) * (width - pad * 2);
+      const toScreenY = (y) => height - pad - ((y - yMin) / (yMax - yMin)) * (height - pad * 2);
+
+      // Draw Grid Lines
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+
+      for (let i = 0; i <= 4; i++) {
+        // Vertical lines
+        const gx = pad + (i / 4) * (width - pad * 2);
+        ctx.beginPath();
+        ctx.moveTo(gx, pad);
+        ctx.lineTo(gx, height - pad);
+        ctx.stroke();
+
+        // Horizontal lines
+        const gy = pad + (i / 4) * (height - pad * 2);
+        ctx.beginPath();
+        ctx.moveTo(pad, gy);
+        ctx.lineTo(width - pad, gy);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Draw Axes
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(pad, pad);
+      ctx.lineTo(pad, height - pad);
+      ctx.lineTo(width - pad, height - pad);
+      ctx.stroke();
+
+      // Axis Labels
+      ctx.fillStyle = "#64748b";
+      ctx.font = "10px Inter, sans-serif";
+      ctx.fillText(DATASETS[currentDatasetKey].xLabel, width / 2 - 20, height - 8);
+
+      // Draw Residual Lines
+      if (residuals && residuals.length > 0) {
+        ctx.strokeStyle = "#f87171";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([2, 2]);
+        residuals.forEach(r => {
+          const sx = toScreenX(r.point.x);
+          const syActual = toScreenY(r.point.y);
+          const syPred = toScreenY(predictY(r.point.x));
+          ctx.beginPath();
+          ctx.moveTo(sx, syActual);
+          ctx.lineTo(sx, syPred);
+          ctx.stroke();
+        });
+        ctx.setLineDash([]);
+      }
+
+      // Draw Smooth Fitted Curve Line
+      ctx.strokeStyle = "#10b981";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      const steps = 150;
+      for (let i = 0; i <= steps; i++) {
+        const curX = xMin + (i / steps) * (xMax - xMin);
+        const curY = predictY(curX);
+        const sx = toScreenX(curX);
+        const sy = toScreenY(curY);
+
+        if (i === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
+      }
+      ctx.stroke();
+
+      // Draw Data Points
+      activePoints.forEach(p => {
+        const sx = toScreenX(p.x);
+        const sy = toScreenY(p.y);
+
+        // Point Outer Glow
+        ctx.fillStyle = "rgba(59, 130, 246, 0.2)";
+        ctx.beginPath();
+        ctx.arc(sx, sy, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Point Main Circle
+        ctx.fillStyle = "#3b82f6";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+    }
+
+    // Render Residual Error Bar Chart
+    function renderResidualsChart(residuals) {
+      residualsChart.innerHTML = "";
+      if (!residuals || residuals.length === 0) return;
+
+      const maxRes = Math.max(...residuals.map(r => r.absRes), 0.1);
+
+      residuals.forEach((r, idx) => {
+        const heightPct = Math.min(100, Math.max(12, (r.absRes / maxRes) * 100));
+        
+        const barContainer = document.createElement("div");
+        barContainer.className = "flex-1 flex flex-col items-center h-full justify-end group relative";
+
+        // Tooltip
+        const tooltip = document.createElement("div");
+        tooltip.className = "absolute -top-7 bg-slate-800 text-white text-[9px] py-0.5 px-1.5 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-10";
+        tooltip.textContent = `Err: ${r.absRes.toFixed(2)}`;
+
+        const bar = document.createElement("div");
+        bar.className = "w-full max-w-[18px] bg-amber-400 group-hover:bg-amber-500 rounded-t transition-all duration-300";
+        bar.style.height = `${heightPct}%`;
+
+        const label = document.createElement("span");
+        label.className = "text-[9px] text-gray-400 mt-1 font-mono";
+        label.textContent = `P${idx + 1}`;
+
+        barContainer.appendChild(tooltip);
+        barContainer.appendChild(bar);
+        barContainer.appendChild(label);
+        residualsChart.appendChild(barContainer);
+      });
+    }
+
+    // Prediction Input Handling
+    function executePrediction() {
+      const val = parseFloat(predictInput.value);
+      if (isNaN(val)) {
+        predictResultText.textContent = "Invalid x input";
+        return;
+      }
+      const predY = predictY(val);
+      const unit = DATASETS[currentDatasetKey].yLabel.includes("$") ? "$" : "";
+      predictResultText.textContent = `y ≈ ${unit}${predY.toFixed(1)}`;
+    }
+
+    // Add Terminal Activity Log Line
+    function addLog(msg) {
+      const p = document.createElement("p");
+      p.className = "text-emerald-400";
+      p.textContent = `> ${msg}`;
+      activityLog.appendChild(p);
+      activityLog.scrollTop = activityLog.scrollHeight;
+    }
+
+    // Event Handlers & Model Mode Switching
+    btnModelLinear.addEventListener("click", () => {
+      modelType = "linear";
+      updateModelButtons();
+      tipText.innerHTML = "<strong>Tip:</strong> Linear fit calculates a straight line (y = mx + c). Simple and robust against overfitting.";
+      runFittingProcess();
+    });
+
+    btnModelPoly.addEventListener("click", () => {
+      modelType = "poly";
+      updateModelButtons();
+      tipText.innerHTML = "<strong>Tip:</strong> Increasing polynomial degree allows capturing complex curves, but high degrees may overfit data!";
+      runFittingProcess();
+    });
+
+    btnModelExp.addEventListener("click", () => {
+      modelType = "exp";
+      updateModelButtons();
+      tipText.innerHTML = "<strong>Tip:</strong> Exponential fitting works well for rapidly accelerating data trends.";
+      runFittingProcess();
+    });
+
+    function updateModelButtons() {
+      const activeClass = "bg-[#3b82f6] text-white shadow-sm font-bold";
+      const inactiveClass = "text-gray-600 hover:text-gray-900";
+
+      btnModelLinear.className = `py-1.5 rounded-md transition text-center ${modelType === 'linear' ? activeClass : inactiveClass}`;
+      btnModelPoly.className = `py-1.5 rounded-md transition text-center ${modelType === 'poly' ? activeClass : inactiveClass}`;
+      btnModelExp.className = `py-1.5 rounded-md transition text-center ${modelType === 'exp' ? activeClass : inactiveClass}`;
+    }
+
+    degreeSlider.addEventListener("input", (e) => {
+      polyDegree = parseInt(e.target.value);
+      degreeVal.textContent = polyDegree;
+      if (modelType !== "poly") {
+        modelType = "poly";
+        updateModelButtons();
+      }
+      runFittingProcess(false);
+    });
+
+    datasetSelect.addEventListener("change", (e) => {
+      currentDatasetKey = e.target.value;
+      activePoints = [...DATASETS[currentDatasetKey].data];
+      // Default input estimate based on dataset
+      if (currentDatasetKey === "ad_spend") predictInput.value = "10";
+      else if (currentDatasetKey === "housing") predictInput.value = "30";
+      else predictInput.value = "28";
+
+      addLog(`Loaded dataset: ${DATASETS[currentDatasetKey].title}`);
+      runFittingProcess();
+    });
+
+    btnFit.addEventListener("click", () => {
+      runFittingProcess(true);
+    });
+
+    btnReset.addEventListener("click", () => {
+      polyDegree = 1;
+      degreeSlider.value = 1;
+      degreeVal.textContent = "1";
+      modelType = "poly";
+      updateModelButtons();
+      activePoints = [...DATASETS[currentDatasetKey].data];
+      addLog("Model reset to default parameters.");
+      runFittingProcess();
+    });
+
+    btnSample.addEventListener("click", () => {
+      // Add slight random perturbation to data
+      activePoints = DATASETS[currentDatasetKey].data.map(p => ({
+        x: p.x,
+        y: Math.max(0, p.y + (Math.random() - 0.5) * (p.y * 0.2))
+      }));
+      addLog("Sampled new noisy dataset variants.");
+      runFittingProcess();
+    });
+
+    btnPredict.addEventListener("click", () => {
+      executePrediction();
+      addLog(`Evaluated prediction at x = ${predictInput.value}`);
+    });
+
+    predictInput.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") executePrediction();
+    });
+
+    btnExport.addEventListener("click", () => {
+      const report = `AI SIM LAB - REGRESSION FIT REPORT\nDataset: ${DATASETS[currentDatasetKey].title}\nDegree: ${polyDegree}\nModel: ${modelType}\nR² Score: ${metricR2.textContent}\nMSE: ${metricMSE.textContent}`;
+      navigator.clipboard?.writeText(report);
+      addLog("Report summary copied to clipboard.");
+    });
+
+    // Window Resize Redraw
+    window.addEventListener("resize", () => {
+      drawPlot(calculateMetrics().residuals);
+    });
+
+    // Initial Startup
+    window.onload = () => {
+      addLog("Initialization complete.");
+      addLog("Loaded dataset: Ad spend vs Sales");
+      runFittingProcess();
+    };
+
+
+    // 1. Parse CSV File Promise
+function parseCSVFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) return reject(new Error("No file provided."));
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const text = e.target.result;
+      const defaultTitle = file.name.replace(/\.[^/.]+$/, "");
+      const lines = text.trim().split("\n");
+      let xLabel = "x";
+      let yLabel = "y";
+      const parsedData = [];
+
+      if (lines.length === 0) return reject(new Error("File is empty."));
+
+      const firstLineParts = lines[0].split(",").map((s) => s.trim());
+      const firstX = parseFloat(firstLineParts[0]);
+      const firstY = parseFloat(firstLineParts[1]);
+
+      let startIndex = 0;
+      if (isNaN(firstX) && isNaN(firstY)) {
+        if (firstLineParts[0]) xLabel = firstLineParts[0];
+        if (firstLineParts[1]) yLabel = firstLineParts[1];
+        startIndex = 1;
+      }
+
+      for (let i = startIndex; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const [xStr, yStr] = line.split(",");
+        const xVal = parseFloat(xStr);
+        const yVal = parseFloat(yStr);
+
+        if (!isNaN(xVal) && !isNaN(yVal)) {
+          parsedData.push({ x: xVal, y: yVal });
+        }
+      }
+
+      resolve({
+        title: defaultTitle,
+        xLabel: xLabel,
+        yLabel: yLabel,
+        data: parsedData
+      });
+    };
+
+    reader.onerror = () => reject(new Error("Failed to read file."));
+    reader.readAsText(file);
+  });
+}
+
+// 2. Attach File Input Listener to Update `#dataset-select`
+document.getElementById('csvFileInput').addEventListener('change', async function (event) {
+  renderDatasetDropdown();
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const loadedDataset = await parseCSVFile(file);
+
+    // Create unique key for the new dataset
+    const datasetKey = `custom_${Date.now()}`;
+
+    // 1. Add to the global DATASETS object
+    DATASETS[datasetKey] = loadedDataset;
+    
+
+    // 2. Select the DOM element using your exact ID
+    const selectEl = document.getElementById('dataset-select');
+    if (selectEl) {
+      // Create new <option>
+      const option = document.createElement('option');
+      option.value = datasetKey;
+      option.textContent = `${loadedDataset.title} (${loadedDataset.data.length} points)`;
+
+      // Append option
+      selectEl.appendChild(option);
+
+      // Instantly switch active dropdown item
+      selectEl.value = datasetKey;
+
+      // Dispatch 'change' event to trigger graph redraw/re-fit calculations
+      selectEl.dispatchEvent(new Event('change'));
+    }
+
+    console.log("Dataset added successfully:", DATASETS[datasetKey]);
+  } catch (error) {
+    console.error("Error parsing CSV:", error.message);
+  }
+});
+function updateGraph() {
+  
+  const selectEl = document.getElementById('dataset-select');
+  
+  // 1. Get user selected key or default to empty
+  let selectedKey = selectEl ? selectEl.value : '';
+
+  // 2. If no valid selection or key doesn't exist in DATASETS, pick the FIRST available key in DATASETS
+  if (!selectedKey || !DATASETS[selectedKey]) {
+    const availableKeys = Object.keys(DATASETS);
+    if (availableKeys.length > 0) {
+      selectedKey = availableKeys[0]; // Gets the first dataset key
+      if (selectEl) selectEl.value = selectedKey; // Sync select UI
+    }
+  }
+
+  // 3. Fetch current dataset
+  const currentDataset = DATASETS[selectedKey];
+
+  // Defensive check: Verify dataset and data array exist
+  if (!currentDataset || !Array.isArray(currentDataset.data)) {
+    console.error(`Dataset for key "${selectedKey}" is invalid or missing data array.`, currentDataset);
+    return;
+  }
+
+  // 4. Extract data points and labels safely
+  const dataPoints = currentDataset.data;
+  const xLabel = currentDataset.xLabel || 'x';
+  const yLabel = currentDataset.yLabel || 'y';
+
+  console.log(`Rendering dataset: ${currentDataset.title} (${dataPoints.length} points)`);
+
+  // Iterate over data points safely
+  for (const point of dataPoints) {
+    console.log(`${xLabel}: ${point.x}, ${yLabel}: ${point.y}`);
+  }
+
+  // Place your graph rendering/canvas fitting logic here
+}
+/**
+ * Synchronizes the <select id="dataset-select"> dropdown options
+ * directly with the keys currently stored in the global DATASETS object.
+ */
+function renderDatasetDropdown() {
+  const selectEl = document.getElementById('dataset-select');
+  if (!selectEl) return;
+
+  // Preserve the currently selected key if possible
+  const currentSelection = selectEl.value;
+
+  // Clear existing options
+  selectEl.innerHTML = '';
+
+  // Loop through all keys in DATASETS object dynamically
+  Object.keys(DATASETS).forEach((key) => {
+    const dataset = DATASETS[key];
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = `${dataset.title} (${dataset.data.length} points)`;
+    selectEl.appendChild(option);
+  });
+
+  // Restore selection if it still exists, otherwise default to the first available key
+  if (currentSelection && DATASETS[currentSelection]) {
+    selectEl.value = currentSelection;
+  } else if (Object.keys(DATASETS).length > 0) {
+    selectEl.value = Object.keys(DATASETS)[0];
+  }
+}
+  </script>
+</body>
+</html>

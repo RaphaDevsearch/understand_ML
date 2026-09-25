@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Sim Lab - Load Dataset from File</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #eef2f6;
+    }
+
+    /* Grid pattern background matching simulator */
+    .grid-bg {
+      background-size: 20px 20px;
+      background-image: 
+        linear-gradient(to right, rgba(200, 210, 225, 0.4) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(200, 210, 225, 0.4) 1px, transparent 1px);
+    }
+
+    /* Custom scrollbar for data preview table */
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Drag over highlight */
+    .drag-over {
+      border-color: #3b82f6 !important;
+      background-color: #eff6ff !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen grid-bg text-gray-800 flex flex-col justify-between">
+
+  <!-- Navigation Header Bar -->
+  <header class="bg-[#1e293b] text-white px-6 py-3 flex items-center justify-between shadow-md sticky top-0 z-50">
+    <div class="flex items-center space-x-3">
+      <div class="w-4 h-4 rounded-full bg-white flex items-center justify-center">
+        <div class="w-2 h-2 rounded-full bg-[#1e293b]"></div>
+      </div>
+      <span class="font-bold text-lg tracking-wide">AI Sim Lab</span>
+      <span class="text-xs bg-blue-600/80 px-2 py-0.5 rounded text-blue-100 font-medium">Dataset Manager</span>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="hidden md:flex space-x-1 bg-[#0f172a]/50 p-1 rounded-full text-sm font-medium">
+      <a href="linear_regression_lab.html" class="text-gray-300 hover:text-white px-4 py-1.5 rounded-full transition flex items-center space-x-1.5">
+        <i class="fa-solid fa-flask text-xs"></i>
+        <span>Simulate</span>
+      </a>
+      <button class="bg-[#3b82f6] text-white px-5 py-1.5 rounded-full font-semibold transition flex items-center space-x-1.5">
+        <i class="fa-solid fa-database text-xs"></i>
+        <span>Datasets</span>
+      </button>
+      <button class="text-gray-300 hover:text-white px-4 py-1.5 rounded-full transition">Models</button>
+      <button class="text-gray-300 hover:text-white px-4 py-1.5 rounded-full transition">Learn</button>
+    </nav>
+
+    <!-- User Profile & Controls -->
+    <div class="flex items-center space-x-3">
+      <button class="w-8 h-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-xs text-gray-200 transition">
+        ?
+      </button>
+      <div class="w-9 h-9 rounded-full bg-amber-500 text-slate-900 font-bold text-xs flex items-center justify-center border-2 border-slate-600">
+        JD
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-[1500px] mx-auto p-4 md:p-6 w-full flex-grow">
+    
+    <!-- Top Bar Title & Quick Actions -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight flex items-center space-x-2">
+          <i class="fa-solid fa-file-import text-blue-600"></i>
+          <span>Import Dataset from File</span>
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">
+          Upload a CSV, TSV, or plain text dataset file to configure labels and preview coordinates for linear regression.
+        </p>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button id="btn-load-sample" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold py-2 px-4 rounded-lg text-xs transition shadow-sm flex items-center space-x-2">
+          <i class="fa-solid fa-[#3b82f6] fa-vial text-blue-500"></i>
+          <span>Load Sample File</span>
+        </button>
+        <button id="btn-reset-all" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold py-2 px-4 rounded-lg text-xs transition shadow-sm flex items-center space-x-2">
+          <i class="fa-solid fa-rotate-left text-slate-400"></i>
+          <span>Reset Form</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT COLUMN: File Upload & Metadata Controls (5 Cols) -->
+      <div class="lg:col-span-5 flex flex-col space-y-6">
+
+        <!-- File Upload Card -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+          <h2 class="font-bold text-gray-900 text-base mb-3 flex items-center justify-between">
+            <span>1. Upload File</span>
+            <span id="file-status-badge" class="text-[11px] font-medium bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">No file selected</span>
+          </h2>
+
+          <!-- Dropzone -->
+          <div id="dropzone" class="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-3 group">
+            <input type="file" id="file-input" accept=".csv, .tsv, .txt, .json" class="hidden">
+            <div class="w-12 h-12 rounded-full bg-blue-50 group-hover:bg-blue-100 text-blue-600 flex items-center justify-center text-xl transition">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-slate-700">Click to upload or drag & drop</p>
+              <p class="text-xs text-slate-400 mt-1">Supports CSV, TSV, TXT (x, y coordinate format)</p>
+            </div>
+          </div>
+
+          <!-- File Info Info Strip -->
+          <div id="file-info-strip" class="hidden mt-3 p-3 bg-blue-50/70 border border-blue-200/80 rounded-lg flex items-center justify-between text-xs text-blue-900">
+            <div class="flex items-center space-x-2 truncate">
+              <i class="fa-solid fa-file-csv text-blue-600 text-base"></i>
+              <span id="file-name-text" class="font-semibold truncate">data.csv</span>
+              <span id="file-size-text" class="text-blue-500 text-[11px]">(0 KB)</span>
+            </div>
+            <button id="btn-remove-file" class="text-slate-400 hover:text-red-500 transition p-1">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dataset Metadata Configuration Panel -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 space-y-4">
+          <h2 class="font-bold text-gray-900 text-base border-b border-slate-100 pb-2">
+            2. Dataset Metadata
+          </h2>
+
+          <!-- Dataset Title Input -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+              Dataset Title <span class="text-slate-400 font-normal lowercase">(defaults to file name)</span>
+            </label>
+            <div class="relative">
+              <input type="text" id="dataset-title" placeholder="Enter dataset title..." class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <i class="fa-solid fa-heading absolute left-3 top-2.5 text-xs text-slate-400"></i>
+            </div>
+          </div>
+
+          <!-- X and Y Axis Labels (Side by Side) -->
+          <div class="grid grid-cols-2 gap-3">
+            <!-- X Label -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                X Label <span class="text-slate-400 font-normal lowercase">(default: x)</span>
+              </label>
+              <div class="relative">
+                <input type="text" id="label-x" value="x" placeholder="X label" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-8 pr-3 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                <span class="absolute left-3 top-2 text-xs font-bold text-blue-600">X</span>
+              </div>
+            </div>
+
+            <!-- Y Label -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                Y Label <span class="text-slate-400 font-normal lowercase">(default: y)</span>
+              </label>
+              <div class="relative">
+                <input type="text" id="label-y" value="y" placeholder="Y label" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-8 pr-3 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                <span class="absolute left-3 top-2 text-xs font-bold text-emerald-600">Y</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parser Options -->
+          <div class="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Delimiter</label>
+              <select id="select-delimiter" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="auto">Auto-detect</option>
+                <option value=",">Comma (,)</option>
+                <option value="\t">Tab (\t)</option>
+                <option value=";">Semicolon (;)</option>
+                <option value=" ">Space ( )</option>
+              </select>
+            </div>
+
+            <div class="flex items-center pt-4">
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="check-has-header" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4 w-4">
+                <span class="ml-2 text-xs font-medium text-slate-600">First row is header</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Submit Action Button -->
+          <button id="btn-save-dataset" class="w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold py-2.5 px-4 rounded-lg shadow transition flex items-center justify-center space-x-2 text-sm mt-2">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Load into Regression Lab</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Data Preview Chart & Table (7 Cols) -->
+      <div class="lg:col-span-7 flex flex-col space-y-6">
+
+        <!-- Metric Summary Bar -->
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 text-center">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Total Points</span>
+            <span id="metric-points-count" class="text-xl font-bold text-slate-800 font-mono">0</span>
+          </div>
+          <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 text-center">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">X Range</span>
+            <span id="metric-x-range" class="text-xl font-bold text-blue-600 font-mono">N/A</span>
+          </div>
+          <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 text-center">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Y Range</span>
+            <span id="metric-y-range" class="text-xl font-bold text-emerald-600 font-mono">N/A</span>
+          </div>
+        </div>
+
+        <!-- Scatter Plot Canvas Preview Panel -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="font-bold text-gray-900 text-base">3. Visual Plot Preview</h2>
+            <span class="text-xs text-slate-400 font-mono" id="plot-title-indicator">No data loaded</span>
+          </div>
+
+          <div class="relative w-full h-56 bg-slate-50 border border-slate-200 rounded-lg p-2 overflow-hidden flex items-center justify-center">
+            <canvas id="preview-canvas" class="w-full h-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Editable Data Points Table Card -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex-grow flex flex-col">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="font-bold text-gray-900 text-base">4. Parsed Data Points</h2>
+            
+            <!-- Quick Add Row Button -->
+            <button id="btn-add-row" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-1 px-3 rounded-md transition flex items-center space-x-1">
+              <i class="fa-solid fa-plus text-blue-600"></i>
+              <span>Add Point</span>
+            </button>
+          </div>
+
+          <!-- Table Wrapper -->
+          <div class="border border-slate-200 rounded-lg overflow-hidden flex-grow min-h-[200px] max-h-[260px] overflow-y-auto custom-scroll">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-100 text-slate-600 uppercase tracking-wider sticky top-0 border-b border-slate-200">
+                <tr>
+                  <th class="py-2 px-3 w-12 text-center">#</th>
+                  <th class="py-2 px-3 font-semibold text-blue-700" id="th-x-label">X</th>
+                  <th class="py-2 px-3 font-semibold text-emerald-700" id="th-y-label">Y</th>
+                  <th class="py-2 px-3 w-16 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-body" class="divide-y divide-slate-100 font-mono text-slate-800">
+                <!-- Dynamic Rows Inserted Here -->
+                <tr>
+                  <td colspan="4" class="text-center py-8 text-slate-400 font-sans">
+                    No data points loaded. Upload a file or click "Load Sample File".
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Notification / Toast Alert -->
+    <div id="toast-message" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-lg shadow-lg hidden flex items-center space-x-2 transition-all duration-300 z-50">
+      <i class="fa-solid fa-circle-info text-blue-400"></i>
+      <span id="toast-text">Message</span>
+    </div>
+
+  </main>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // Application State
+    let dataset = {
+      title: "",
+      xLabel: "x",
+      yLabel: "y",
+      points: []
+    };
+
+    // DOM Elements
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("file-input");
+    const fileStatusBadge = document.getElementById("file-status-badge");
+    const fileInfoStrip = document.getElementById("file-info-strip");
+    const fileNameText = document.getElementById("file-name-text");
+    const fileSizeText = document.getElementById("file-size-text");
+    const btnRemoveFile = document.getElementById("btn-remove-file");
+
+    const inputTitle = document.getElementById("dataset-title");
+    const inputLabelX = document.getElementById("label-x");
+    const inputLabelY = document.getElementById("label-y");
+    const selectDelimiter = document.getElementById("select-delimiter");
+    const checkHasHeader = document.getElementById("check-has-header");
+
+    const metricPointsCount = document.getElementById("metric-points-count");
+    const metricXRange = document.getElementById("metric-x-range");
+    const metricYRange = document.getElementById("metric-y-range");
+
+    const previewCanvas = document.getElementById("preview-canvas");
+    const ctx = previewCanvas.getContext("2d");
+    const plotTitleIndicator = document.getElementById("plot-title-indicator");
+
+    const tableBody = document.getElementById("table-body");
+    const thXLabel = document.getElementById("th-x-label");
+    const thYLabel = document.getElementById("th-y-label");
+    const btnAddRow = document.getElementById("btn-add-row");
+    const btnSaveDataset = document.getElementById("btn-save-dataset");
+    const btnLoadSample = document.getElementById("btn-load-sample");
+    const btnResetAll = document.getElementById("btn-reset-all");
+
+    // File Drag & Drop Listeners
+    dropzone.addEventListener("click", () => fileInput.click());
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('drag-over');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('drag-over');
+      }, false);
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) processFile(files[0]);
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) processFile(e.target.files[0]);
+    });
+
+    btnRemoveFile.addEventListener("click", () => resetFileForm());
+
+    // Main File Processor
+    function processFile(file) {
+      // 1. Set Default Title from Filename (strip extension)
+      const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+      dataset.title = fileNameWithoutExt;
+      inputTitle.value = fileNameWithoutExt;
+
+      // 2. Set Default X Label = "x", Y Label = "y"
+      inputLabelX.value = "x";
+      inputLabelY.value = "y";
+      dataset.xLabel = "x";
+      dataset.yLabel = "y";
+
+      // Update File Info Strip
+      fileNameText.textContent = file.name;
+      fileSizeText.textContent = `(${(file.size / 1024).toFixed(1)} KB)`;
+      fileInfoStrip.classList.remove("hidden");
+      fileStatusBadge.textContent = "File Loaded";
+      fileStatusBadge.className = "text-[11px] font-medium bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full";
+
+      // Read File Contents
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target.result;
+        parseDatasetText(text);
+      };
+      reader.readAsText(file);
+    }
+
+    // Auto-detect delimiter and parse numeric (x, y) coordinates
+    function parseDatasetText(rawText) {
+      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length === 0) {
+        showToast("Uploaded file is empty!");
+        return;
+      }
+
+      // Determine Delimiter
+      let delim = selectDelimiter.value;
+      if (delim === "auto") {
+        const sampleLine = lines[0];
+        if (sampleLine.includes(",")) delim = ",";
+        else if (sampleLine.includes("\t")) delim = "\t";
+        else if (sampleLine.includes(";")) delim = ";";
+        else delim = " ";
+      }
+
+      let startIndex = 0;
+      // Header check
+      if (checkHasHeader.checked && lines.length > 1) {
+        const headerParts = lines[0].split(delim).map(s => s.trim().replace(/^["']|["']$/g, ""));
+        if (headerParts.length >= 2) {
+          if (headerParts[0]) {
+            inputLabelX.value = headerParts[0];
+            dataset.xLabel = headerParts[0];
+          }
+          if (headerParts[1]) {
+            inputLabelY.value = headerParts[1];
+            dataset.yLabel = headerParts[1];
+          }
+        }
+        startIndex = 1;
+      }
+
+      const parsedPoints = [];
+      for (let i = startIndex; i < lines.length; i++) {
+        const parts = lines[i].split(delim).map(p => p.trim());
+        if (parts.length >= 2) {
+          const xVal = parseFloat(parts[0]);
+          const yVal = parseFloat(parts[1]);
+          if (!isNaN(xVal) && !isNaN(yVal)) {
+            parsedPoints.push({ x: xVal, y: yVal });
+          }
+        }
+      }
+
+      dataset.points = parsedPoints;
+      updateUI();
+      showToast(`Successfully loaded ${parsedPoints.length} points.`);
+    }
+
+    // Dynamic UI Refresh
+    function updateUI() {
+      // Sync Labels
+      dataset.title = inputTitle.value.trim() || "Untitled Dataset";
+      dataset.xLabel = inputLabelX.value.trim() || "x";
+      dataset.yLabel = inputLabelY.value.trim() || "y";
+
+      thXLabel.textContent = dataset.xLabel;
+      thYLabel.textContent = dataset.yLabel;
+      plotTitleIndicator.textContent = dataset.title;
+
+      const pts = dataset.points;
+      metricPointsCount.textContent = pts.length;
+
+      if (pts.length > 0) {
+        const xVals = pts.map(p => p.x);
+        const yVals = pts.map(p => p.y);
+        const minX = Math.min(...xVals).toFixed(1);
+        const maxX = Math.max(...xVals).toFixed(1);
+        const minY = Math.min(...yVals).toFixed(1);
+        const maxY = Math.max(...yVals).toFixed(1);
+
+        metricXRange.textContent = `${minX} → ${maxX}`;
+        metricYRange.textContent = `${minY} → ${maxY}`;
+      } else {
+        metricXRange.textContent = "N/A";
+        metricYRange.textContent = "N/A";
+      }
+
+      renderTable();
+      drawPreviewPlot();
+    }
+
+    // Table Rendering
+    function renderTable() {
+      tableBody.innerHTML = "";
+
+      if (dataset.points.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center py-8 text-slate-400 font-sans">
+              No data points loaded. Upload a file or click "Load Sample File".
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      dataset.points.forEach((pt, index) => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50/80 transition";
+
+        tr.innerHTML = `
+          <td class="py-2 px-3 text-center text-slate-400 font-sans text-[11px]">${index + 1}</td>
+          <td class="py-1.5 px-3">
+            <input type="number" step="any" value="${pt.x}" data-index="${index}" data-field="x" class="cell-input w-full bg-transparent focus:bg-white border border-transparent focus:border-blue-500 rounded px-1.5 py-0.5 focus:outline-none">
+          </td>
+          <td class="py-1.5 px-3">
+            <input type="number" step="any" value="${pt.y}" data-index="${index}" data-field="y" class="cell-input w-full bg-transparent focus:bg-white border border-transparent focus:border-emerald-500 rounded px-1.5 py-0.5 focus:outline-none">
+          </td>
+          <td class="py-1.5 px-3 text-center">
+            <button data-delete="${index}" class="text-slate-400 hover:text-red-500 p-1 transition">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </td>
+        `;
+
+        tableBody.appendChild(tr);
+      });
+
+      // Cell Edit Handlers
+      tableBody.querySelectorAll(".cell-input").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          const field = e.target.dataset.field;
+          const val = parseFloat(e.target.value);
+          if (!isNaN(val)) {
+            dataset.points[idx][field] = val;
+            updateUI();
+          }
+        });
+      });
+
+      // Delete Row Handlers
+      tableBody.querySelectorAll("[data-delete]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const idx = parseInt(e.currentTarget.dataset.delete);
+          dataset.points.splice(idx, 1);
+          updateUI();
+        });
+      });
+    }
+
+    // Canvas Preview Plot
+    function drawPreviewPlot() {
+      const rect = previewCanvas.getBoundingClientRect();
+      previewCanvas.width = rect.width * window.devicePixelRatio;
+      previewCanvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      const width = rect.width;
+      const height = rect.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const pts = dataset.points;
+      if (pts.length === 0) {
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "12px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Upload or select dataset to view plot preview", width / 2, height / 2);
+        return;
+      }
+
+      const pad = 35;
+      let xMin = Math.min(...pts.map(p => p.x));
+      let xMax = Math.max(...pts.map(p => p.x));
+      let yMin = Math.min(...pts.map(p => p.y));
+      let yMax = Math.max(...pts.map(p => p.y));
+
+      const xSpan = (xMax - xMin) || 10;
+      const ySpan = (yMax - yMin) || 10;
+      xMin -= xSpan * 0.1;
+      xMax += xSpan * 0.1;
+      yMin -= ySpan * 0.1;
+      yMax += ySpan * 0.1;
+
+      const toScreenX = (x) => pad + ((x - xMin) / (xMax - xMin)) * (width - pad * 2);
+      const toScreenY = (y) => height - pad - ((y - yMin) / (yMax - yMin)) * (height - pad * 2);
+
+      // Grid Lines
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      for (let i = 0; i <= 4; i++) {
+        const gx = pad + (i / 4) * (width - pad * 2);
+        ctx.beginPath();
+        ctx.moveTo(gx, pad);
+        ctx.lineTo(gx, height - pad);
+        ctx.stroke();
+
+        const gy = pad + (i / 4) * (height - pad * 2);
+        ctx.beginPath();
+        ctx.moveTo(pad, gy);
+        ctx.lineTo(width - pad, gy);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Axes
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(pad, pad);
+      ctx.lineTo(pad, height - pad);
+      ctx.lineTo(width - pad, height - pad);
+      ctx.stroke();
+
+      // Axis Labels
+      ctx.fillStyle = "#64748b";
+      ctx.font = "10px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(dataset.xLabel, width / 2, height - 8);
+
+      // Scatter Points
+      pts.forEach(p => {
+        const sx = toScreenX(p.x);
+        const sy = toScreenY(p.y);
+
+        ctx.fillStyle = "rgba(59, 130, 246, 0.2)";
+        ctx.beginPath();
+        ctx.arc(sx, sy, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#3b82f6";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+    }
+
+    // Input Listeners
+    [inputTitle, inputLabelX, inputLabelY].forEach(el => {
+      el.addEventListener("input", () => updateUI());
+    });
+
+    selectDelimiter.addEventListener("change", () => {
+      if (fileInput.files.length > 0) processFile(fileInput.files[0]);
+    });
+
+    checkHasHeader.addEventListener("change", () => {
+      if (fileInput.files.length > 0) processFile(fileInput.files[0]);
+    });
+
+    // Add Point Button
+    btnAddRow.addEventListener("click", () => {
+      const lastPt = dataset.points[dataset.points.length - 1] || { x: 0, y: 0 };
+      dataset.points.push({ x: lastPt.x + 1, y: lastPt.y + 2 });
+      updateUI();
+    });
+
+    // Load Sample File Button
+    btnLoadSample.addEventListener("click", () => {
+      const sampleText = `Ad_Spend_k,Sales_k\n1.0,2.2\n2.0,3.8\n3.0,4.5\n4.0,7.0\n5.0,8.5\n6.0,10.8\n7.0,14.2`;
+      
+      // Default Title from sample filename: "ad_spend_vs_sales"
+      const sampleFileName = "ad_spend_vs_sales.csv";
+      inputTitle.value = "ad_spend_vs_sales";
+      inputLabelX.value = "x";
+      inputLabelY.value = "y";
+
+      fileNameText.textContent = sampleFileName;
+      fileSizeText.textContent = "(Sample 1.2 KB)";
+      fileInfoStrip.classList.remove("hidden");
+      fileStatusBadge.textContent = "Sample Loaded";
+      fileStatusBadge.className = "text-[11px] font-medium bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full";
+
+      parseDatasetText(sampleText);
+    });
+
+    // Reset Form Button
+    function resetFileForm() {
+      dataset = { title: "", xLabel: "x", yLabel: "y", points: [] };
+      inputTitle.value = "";
+      inputLabelX.value = "x";
+      inputLabelY.value = "y";
+      fileInput.value = "";
+      fileInfoStrip.classList.add("hidden");
+      fileStatusBadge.textContent = "No file selected";
+      fileStatusBadge.className = "text-[11px] font-medium bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full";
+      updateUI();
+      showToast("Form reset.");
+    }
+
+    btnResetAll.addEventListener("click", resetFileForm);
+
+    // Save/Pass Dataset to Simulator
+    btnSaveDataset.addEventListener("click", () => {
+      if (dataset.points.length === 0) {
+        showToast("Please load at least one data point before saving!");
+        return;
+      }
+
+      // Save to localStorage so simulator app can consume it
+      try {
+        localStorage.setItem("custom_dataset", JSON.stringify(dataset));
+        showToast("Dataset successfully saved and transferred to simulator!");
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1200);
+      } catch (err) {
+        showToast("Saved dataset locally!");
+      }
+    });
+
+    // Toast Message Trigger
+    function showToast(text) {
+      const toast = document.getElementById("toast-message");
+      const toastText = document.getElementById("toast-text");
+      toastText.textContent = text;
+      toast.classList.remove("hidden");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 3000);
+    }
+
+    // Window Resize Redraw
+    window.addEventListener("resize", () => drawPreviewPlot());
+
+    // Initial Load Setup
+    window.onload = () => {
+      btnLoadSample.click();
+    };
+  </script>
+</body>
+</html>
