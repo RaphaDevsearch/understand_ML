@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sim Lab — Interactive Regression & Weak AI Playground</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+   
+    
+    <script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)'], ['$', '$']]
+    }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                        },
+                        darkbg: '#0b1220',
+                        darkcard: '#111c33',
+                        darkborder: '#1e2d4a',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- External Math & Charting Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    
+    <style>
+        /* Subtle Grid Pattern */
+        .bg-grid-pattern {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(100, 116, 139, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(100, 116, 139, 0.08) 1px, transparent 1px);
+        }
+        .dark .bg-grid-pattern {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        }
+
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-panel {
+            background: rgba(17, 28, 51, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Glow effects */
+        .glow-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Custom Scrollbar for activity log */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.4);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-darkbg text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300 min-h-screen relative overflow-x-hidden bg-grid-pattern">
+
+    <!-- Glowing background accents -->
+    <div class="glow-blob w-96 h-96 bg-blue-500 top-10 -left-20"></div>
+    <div class="glow-blob w-96 h-96 bg-emerald-500 top-1/3 -right-20"></div>
+    <div class="glow-blob w-80 h-80 bg-amber-500 bottom-10 left-1/3"></div>
+
+    <!-- Sticky Navigation Bar -->
+    <header class="sticky top-0 z-40 w-full glass-panel border-b border-slate-200/80 dark:border-darkborder transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="#" class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-blue-500 to-emerald-400 flex items-center justify-center text-white font-bold font-mono shadow-md shadow-blue-500/20">
+                    AI
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-lg tracking-tight leading-none text-slate-900 dark:text-white">AI Sim Lab</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">By Raphael Randrianantoanina</span>
+                </div>
+            </a>
+
+            <!-- Nav Links -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                <a href="#hero" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-500 transition">Overview</a>
+                <a href="#features" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-500 transition">Features</a>
+                <a href="#workflow" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-500 transition">How It Works</a>
+                <a href="#simulator" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-500 transition flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Simulator
+                </a>
+                <a href="#perceptron-lab" class="text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-500 transition">Perceptron Lab</a>
+            </nav>
+
+            <div class="flex items-center space-x-3">
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition" title="Toggle Theme">
+                    <!-- Sun Icon -->
+                    <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <!-- Moon Icon -->
+                    <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+
+                <!-- Launch Simulator CTA -->
+                <a href="#simulator" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 rounded-lg shadow-sm shadow-brand-500/30 transition flex items-center space-x-2">
+                    <span>Launch Simulator</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative z-10 pt-12 pb-16 md:pt-20 md:pb-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Hero Left Column -->
+                <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs font-semibold font-mono">
+                        <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
+                        Client-Side ML Simulator • Created by Raphael Randrianantoanina
+                    </div>
+
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                        Watch <span class="bg-gradient-to-r from-brand-600 via-blue-500 to-emerald-500 bg-clip-text text-transparent">AI Learn</span> Step by Step.
+                    </h1>
+
+                    <p class="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        An interactive browser lab to visualize <strong class="text-slate-800 dark:text-slate-100 font-semibold">Gradient Descent</strong>, compare instant normal-equation solves, tune polynomial degrees, and watch a <strong class="text-slate-800 dark:text-slate-100 font-semibold">Perceptron</strong> rotate its decision boundary live.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                        <a href="#simulator" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 text-white font-semibold text-base shadow-lg shadow-brand-500/25 transition transform hover:-translate-y-0.5 flex items-center justify-center space-x-2">
+                            <span>Open Simulator Workspace</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                        </a>
+                        <a href="#perceptron-lab" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-200/80 hover:bg-slate-300/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-base transition flex items-center justify-center space-x-2">
+                            <span>Perceptron Lab</span>
+                        </a>
+                    </div>
+
+                    <!-- Highlights row -->
+                    <div class="pt-4 grid grid-cols-3 gap-4 border-t border-slate-200 dark:border-darkborder text-left">
+                        <div>
+                            <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">0 ms</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400">Server Latency (100% Local)</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold font-mono text-brand-600 dark:text-brand-400">Deg 1–6</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400">Polynomial Fits</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold font-mono text-emerald-500">Live GD</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400">Animated Optimization</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Right Column: Animated Live Demo Preview Widget -->
+                <div class="lg:col-span-6">
+                    <div class="rounded-2xl p-5 bg-white/90 dark:bg-darkcard/90 border border-slate-200 dark:border-darkborder shadow-2xl shadow-blue-500/10 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-darkborder pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                                <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                                <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                                <span class="ml-2 text-xs font-mono font-semibold text-slate-500 dark:text-slate-400">Hero Live Preview: Gradient Descent Optimization</span>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">
+                                Epoch <span id="heroEpochCounter">0</span>
+                            </span>
+                        </div>
+
+                        <!-- Mini Canvas Container -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 h-52">
+                            <div class="relative bg-slate-50 dark:bg-slate-900/60 rounded-xl p-2 border border-slate-200/60 dark:border-slate-800">
+                                <div class="text-[11px] font-mono font-medium text-slate-500 mb-1">Fitting Model Curve</div>
+                                <div class="h-40 relative">
+                                    <canvas id="heroFitChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="relative bg-slate-50 dark:bg-slate-900/60 rounded-xl p-2 border border-slate-200/60 dark:border-slate-800">
+                                <div class="text-[11px] font-mono font-medium text-slate-500 mb-1">Falling Loss (MSE)</div>
+                                <div class="h-40 relative">
+                                    <canvas id="heroLossChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400 pt-1">
+                            <span>Status: <strong id="heroStatus" class="text-emerald-500">Learning...</strong></span>
+                            <span>Loss: <strong id="heroLossValue" class="text-slate-800 dark:text-slate-200">0.0000</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 relative z-10 border-t border-slate-200/60 dark:border-darkborder/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-xs font-bold font-mono uppercase tracking-widest text-brand-600 dark:text-brand-400 mb-2">Why AI Sim Lab</h2>
+                <p class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                    Intuitive Machine Learning Without Black Boxes
+                </p>
+                <p class="mt-3 text-slate-600 dark:text-slate-400 text-sm">
+                    Most tools give you a static line instantly. AI Sim Lab opens up the hood so you can see weights iterate and error surfaces collapse.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Feature 1 -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder hover:border-brand-500/50 hover:shadow-xl hover:shadow-brand-500/10 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Instant vs. Live GD</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Compare mathematical closed-form Normal Equations (<span class="font-mono text-brand-600">math.lusolve</span>) with animated step-by-step Gradient Descent updates.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Perceptron Lab</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Binary classification live playground. Place Class A (+1) and Class B (-1) points and watch the decision line rotate to separate them.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/10 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Custom CSV/TSV Importer</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Drop in your own CSV datasets parsed securely via PapaParse with automatic column header detection and live data preview.
+                    </p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/10 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Interactive Plot Editing</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Directly click the canvas to add custom outliers or remove points to instantly see how model parameters and $R^2$ scores adapt.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow Section -->
+    <section id="workflow" class="py-16 relative z-10 bg-slate-100/50 dark:bg-slate-900/40 border-y border-slate-200/60 dark:border-darkborder/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-xs font-bold font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-2">Simple 4-Step Process</h2>
+                <p class="text-3xl font-extrabold text-slate-900 dark:text-white">How You Learn With AI Sim Lab</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+                <!-- Step 1 -->
+                <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder shadow-sm">
+                    <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 mb-2">STEP 01</div>
+                    <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">Pick or Draw Data</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Select built-in datasets (Ad Spend, Housing, Runge) or click the plot area to place custom data points.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder shadow-sm">
+                    <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 mb-2">STEP 02</div>
+                    <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">Select Model & Degree</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Choose Linear, Polynomial (Degree 1 through 6), or Exponential model families to evaluate capacity.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder shadow-sm">
+                    <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 mb-2">STEP 03</div>
+                    <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">Watch GD Learn</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Press Train and watch learning rate sliders control epoch-by-epoch convergence and loss reduction.</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder shadow-sm">
+                    <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 mb-2">STEP 04</div>
+                    <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">Inspect & Predict</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Analyze $R^2$, Mean Squared Error, and residuals bar chart, then make test predictions instantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Strip -->
+    <div class="py-8 border-b border-slate-200/60 dark:border-darkborder/60 bg-white/40 dark:bg-darkcard/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-80 text-xs font-mono text-slate-600 dark:text-slate-400">
+            <span class="flex items-center gap-2"><strong class="text-slate-900 dark:text-white font-sans">Math Engine:</strong> math.js</span>
+            <span class="flex items-center gap-2"><strong class="text-slate-900 dark:text-white font-sans">Charting:</strong> Chart.js</span>
+            <span class="flex items-center gap-2"><strong class="text-slate-900 dark:text-white font-sans">CSV Parsing:</strong> PapaParse</span>
+            <span class="flex items-center gap-2"><strong class="text-slate-900 dark:text-white font-sans">UI Styling:</strong> Tailwind CSS</span>
+        </div>
+    </div>
+
+    <!-- MAIN INTERACTIVE WORKSPACE SECTION -->
+    <section id="simulator" class="py-12 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            
+            <!-- Section Title Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-darkborder pb-6">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
+                        <span>Regression Simulator Workspace</span>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 font-mono font-normal">v2.4 Live</span>
+                    </h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure models, draw points on plot, adjust learning rate, and observe loss curves.</p>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button onclick="openImportModal()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        Import Custom CSV
+                    </button>
+                    <button onclick="exportDatasetCSV()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Workspace Top Grid: Controls (Panel 1) & Charts (Panel 2) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Panel 1: Setup & Controls -->
+                <div class="lg:col-span-4 bg-white dark:bg-darkcard rounded-2xl p-5 border border-slate-200 dark:border-darkborder shadow-sm space-y-5">
+                    <h3 class="text-sm font-bold font-mono uppercase tracking-wide text-slate-900 dark:text-white flex items-center justify-between">
+                        <span>1. Setup & Hyperparams</span>
+                        <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+                    </h3>
+
+                    <!-- Dataset Selection -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Dataset Preset</label>
+                        <select id="datasetSelect" onchange="loadPresetDataset(this.value)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-brand-500 outline-none">
+                            <option value="ad_spend">Ad Spend vs. Revenue (Linear-ish)</option>
+                            <option value="housing">House Size vs. Price (Quadratic)</option>
+                            <option value="runge">Runge Function (Polynomial Challenge)</option>
+                            <option value="custom">Custom / Click-drawn Dataset</option>
+                        </select>
+                    </div>
+
+                    <!-- Model Family -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Model Family</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button id="btnLinear" onclick="setModelFamily('linear')" class="model-btn py-2 px-2 text-xs font-semibold rounded-xl border border-brand-500 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400">
+                                Linear
+                            </button>
+                            <button id="btnPoly" onclick="setModelFamily('polynomial')" class="model-btn py-2 px-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                                Polynomial
+                            </button>
+                            <button id="btnExp" onclick="setModelFamily('exponential')" class="model-btn py-2 px-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                                Exponential
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Degree Slider (Conditional) -->
+                    <div id="polyDegreeContainer" class="space-y-1.5">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">Polynomial Degree (d)</span>
+                            <span id="polyDegreeVal" class="font-mono font-bold text-brand-600 dark:text-brand-400">2</span>
+                        </div>
+                        <input id="polyDegreeSlider" type="range" min="1" max="6" value="2" oninput="updateDegree(this.value)" class="w-full accent-brand-600 cursor-pointer">
+                        <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                            <span>1 (Linear)</span>
+                            <span>3</span>
+                            <span>6 (Overfitting risk)</span>
+                        </div>
+                    </div>
+
+                    <!-- Fit Method Toggle -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Fitting Algorithm</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnClosedForm" onclick="setFitMethod('closed_form')" class="fit-btn py-2 px-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                                Instant Solve
+                            </button>
+                            <button id="btnGD" onclick="setFitMethod('gd')" class="fit-btn py-2 px-2 text-xs font-semibold rounded-xl border border-brand-500 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400">
+                                Learn (GD)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hyperparameters for GD -->
+                    <div id="gdHyperparamsContainer" class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800 space-y-3">
+                        <!-- Learning Rate -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span class="font-medium text-slate-600 dark:text-slate-400">Learning Rate (&eta;)</span>
+                                <span id="lrVal" class="font-mono font-bold text-slate-800 dark:text-slate-200">0.050</span>
+                            </div>
+                            <input id="lrSlider" type="range" min="0.001" max="0.30" step="0.005" value="0.05" oninput="updateLR(this.value)" class="w-full accent-brand-600">
+                        </div>
+
+                        <!-- Speed / Steps per Frame -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span class="font-medium text-slate-600 dark:text-slate-400">Epoch Speed</span>
+                                <span id="speedVal" class="font-mono font-bold text-slate-800 dark:text-slate-200">2 epochs / frame</span>
+                            </div>
+                            <input id="speedSlider" type="range" min="1" max="20" value="2" oninput="updateSpeed(this.value)" class="w-full accent-brand-600">
+                        </div>
+                    </div>
+
+                    <!-- Point Editing Buttons -->
+                    <div class="pt-2 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-darkborder">
+                        <span class="text-xs text-slate-500">Canvas interaction: Click canvas to add point.</span>
+                        <button onclick="clearAllDataPoints()" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 hover:bg-red-100 transition whitespace-nowrap">
+                            Clear Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Main Scatter & Fitted Curve Chart + Loss Curve -->
+                <div class="lg:col-span-8 flex flex-col space-y-4">
+                    
+                    <!-- Top Main Canvas Card -->
+                    <div class="bg-white dark:bg-darkcard rounded-2xl p-5 border border-slate-200 dark:border-darkborder shadow-sm flex-1 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <h3 class="text-sm font-bold font-mono uppercase tracking-wide text-slate-900 dark:text-white">2. Regression Plot</h3>
+                                <span id="pointCountBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                    0 points
+                                </span>
+                            </div>
+                            <div class="text-xs font-mono text-slate-500">
+                                Model: <span id="modelEquationDisplay" class="font-semibold text-brand-600 dark:text-brand-400">y = w0 + w1*x</span>
+                            </div>
+                        </div>
+
+                        <!-- Scatter Chart Element -->
+                        <div class="h-72 sm:h-80 relative w-full">
+                            <canvas id="regressionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Panel 3: Training Control Bar & Mini Loss Chart -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                        
+                        <!-- Training Control Bar -->
+                        <div class="sm:col-span-6 bg-white dark:bg-darkcard rounded-2xl p-4 border border-slate-200 dark:border-darkborder shadow-sm flex flex-col justify-between space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold font-mono text-slate-500 uppercase">3. Optimization Loop</span>
+                                <span class="text-xs font-mono">Epoch: <strong id="mainEpochCount" class="text-brand-600 dark:text-brand-400 font-bold">0</strong></span>
+                            </div>
+
+                            <div class="flex items-center space-x-2">
+                                <button id="btnTrainPause" onclick="toggleTraining()" class="flex-1 py-2 px-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-md shadow-brand-500/20 transition flex items-center justify-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                                    <span id="trainBtnText">Train GD</span>
+                                </button>
+                                <button onclick="stepGDEpoch()" class="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition">
+                                    Step +1
+                                </button>
+                                <button onclick="resetGDWeights()" class="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs transition">
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mini Real-time Loss Chart -->
+                        <div class="sm:col-span-6 bg-white dark:bg-darkcard rounded-2xl p-4 border border-slate-200 dark:border-darkborder shadow-sm flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-bold font-mono text-slate-500 uppercase">Loss (MSE)</span>
+                                <span id="currentLossDisplay" class="text-xs font-mono font-bold text-emerald-500">0.0000</span>
+                            </div>
+                            <div class="h-16 relative">
+                                <canvas id="lossChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Workspace Bottom Grid: Prediction Tool (Panel 4) & Metrics/Residuals (Panel 5) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Panel 4: Test & Prediction Tool -->
+                <div class="lg:col-span-4 bg-white dark:bg-darkcard rounded-2xl p-5 border border-slate-200 dark:border-darkborder shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold font-mono uppercase tracking-wide text-slate-900 dark:text-white flex items-center justify-between">
+                        <span>4. Predict & Test</span>
+                        <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    </h3>
+
+                    <p class="text-xs text-slate-500">Input an X value to calculate the predicted response Y given current weights.</p>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Input Value (X)</label>
+                            <input id="predictInputX" type="number" step="any" value="50" oninput="runPrediction()" class="w-full mt-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-mono font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
+                        </div>
+
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200/80 dark:border-slate-800 text-center space-y-1">
+                            <div class="text-xs font-mono text-slate-500">Predicted Output (&#375;)</div>
+                            <div id="predictResultY" class="text-2xl font-mono font-extrabold text-brand-600 dark:text-brand-400">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 5: Metrics & Residuals Chart -->
+                <div class="lg:col-span-8 bg-white dark:bg-darkcard rounded-2xl p-5 border border-slate-200 dark:border-darkborder shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold font-mono uppercase tracking-wide text-slate-900 dark:text-white">5. Evaluation Metrics & Residuals</h3>
+                        <div class="flex space-x-4 text-xs font-mono">
+                            <div>R&sup2; Score: <strong id="r2Metric" class="text-brand-600 dark:text-brand-400 font-bold">0.000</strong></div>
+                            <div>MSE: <strong id="mseMetric" class="text-emerald-500 font-bold">0.000</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                        <!-- Residuals Bar Chart -->
+                        <div class="sm:col-span-7 h-44 relative">
+                            <canvas id="residualsChart"></canvas>
+                        </div>
+
+                        <!-- Activity Log Stream -->
+                        <div class="sm:col-span-5 bg-slate-50 dark:bg-slate-900/80 rounded-xl p-3 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
+                            <div class="text-[11px] font-mono font-bold text-slate-500 uppercase mb-2">Training Activity Log</div>
+                            <div id="activityLog" class="h-32 overflow-y-auto font-mono text-[11px] space-y-1 custom-scrollbar text-slate-600 dark:text-slate-400 pr-1">
+                                <div>[System] Simulator workspace initialized.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- BONUS SECTION: PERCEPTRON LAB (BINARY CLASSIFICATION) -->
+    <section id="perceptron-lab" class="py-16 relative z-10 bg-slate-100/50 dark:bg-slate-900/40 border-t border-slate-200/60 dark:border-darkborder/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            
+            <div class="text-center max-w-3xl mx-auto space-y-2">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-semibold">
+                    Binary Classification Live Demo
+                </div>
+                <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Perceptron Lab</h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">
+                    Place Class A (+1, Blue) and Class B (-1, Amber) points on the 2D plane. Watch the single-neuron perceptron update weights using $w \leftarrow w + \eta \cdot c \cdot x$ and rotate the boundary line live.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Perceptron Controls -->
+                <div class="lg:col-span-4 bg-white dark:bg-darkcard rounded-2xl p-5 border border-slate-200 dark:border-darkborder shadow-sm space-y-5">
+                    <h3 class="text-sm font-bold font-mono uppercase tracking-wide text-slate-900 dark:text-white">Perceptron Setup</h3>
+
+                    <!-- Class Selection toggle -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Click Canvas to Add Point As:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="btnClassA" onclick="setPerceptronClass(+1)" class="py-2 px-3 text-xs font-bold rounded-xl border border-blue-500 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-blue-500"></span> Class A (+1)
+                            </button>
+                            <button id="btnClassB" onclick="setPerceptronClass(-1)" class="py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-amber-500"></span> Class B (-1)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Perceptron Learning Rate -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">Learning Rate (&eta;)</span>
+                            <span id="percLrVal" class="font-mono font-bold text-slate-800 dark:text-slate-200">0.10</span>
+                        </div>
+                        <input id="percLrSlider" type="range" min="0.01" max="0.5" step="0.01" value="0.1" oninput="document.getElementById('percLrVal').innerText = parseFloat(this.value).toFixed(2)" class="w-full accent-emerald-500">
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-2 pt-2">
+                        <button id="btnTrainPerceptron" onclick="togglePerceptronTraining()" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md shadow-emerald-500/20 transition flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+                            <span id="percTrainBtnText">Train Perceptron Live</span>
+                        </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="loadPerceptronPreset()" class="py-2 px-3 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">
+                                Reset Preset
+                            </button>
+                            <button onclick="clearPerceptronPoints()" class="py-2 px-3 text-xs font-semibold rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 transition">
+                                Clear Canvas
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Weights Readout -->
+                    <div class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800 font-mono text-xs space-y-1">
+                        <div class="text-[10px] uppercase text-slate-400 font-bold">Current Hyperplane Weights</div>
+                        <div>w1: <strong id="percW1Display" class="text-blue-500">0.00</strong></div>
+                        <div>w2: <strong id="percW2Display" class="text-blue-500">0.00</strong></div>
+                        <div>bias (b): <strong id="percBDisplay" class="text-amber-500">0.00</strong></div>
+                    </div>
+                </div>
+
+                <!-- Perceptron Plot -->
+                <div class="lg:col-span-8 bg-white dark:bg-darkcard rounded-2xl p-5 border border-slate-200 dark:border-darkborder shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center space-x-2">
+                            <h3 class="text-sm font-bold font-mono uppercase tracking-wide text-slate-900 dark:text-white">Classification Scatter</h3>
+                            <span id="percPointCount" class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                0 points
+                            </span>
+                        </div>
+                        <div class="text-xs font-mono text-slate-500">
+                            Epoch: <strong id="percEpochCount" class="text-emerald-500">0</strong> | Status: <span id="percStatus" class="font-bold text-slate-700 dark:text-slate-300">Ready</span>
+                        </div>
+                    </div>
+
+                    <div class="h-80 relative w-full">
+                        <canvas id="perceptronChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CSV IMPORT MODAL -->
+    <div id="csvModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-darkcard rounded-2xl max-w-lg w-full p-6 border border-slate-200 dark:border-darkborder shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-darkborder pb-3">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Import Custom CSV / TSV Dataset
+                </h3>
+                <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="font-semibold text-slate-700 dark:text-slate-300 mb-1 block">Paste CSV/TSV Text or Upload File</label>
+                    <textarea id="csvPasteArea" rows="5" placeholder="x,y&#10;10,25&#10;20,42&#10;30,68..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-3 font-mono focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer font-semibold text-slate-700 dark:text-slate-300 transition">
+                        <span>Choose File...</span>
+                        <input type="file" id="csvFileInput" accept=".csv,.tsv,.txt" onchange="handleFileSelect(event)" class="hidden">
+                    </label>
+                    <span id="fileFileName" class="text-slate-400 font-mono text-[11px]">No file selected</span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-darkborder">
+                <button onclick="closeImportModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition">Cancel</button>
+                <button onclick="parseAndLoadCSV()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 transition">Parse & Load Dataset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="py-12 border-t border-slate-200 dark:border-darkborder bg-white dark:bg-darkcard text-xs text-slate-500 dark:text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-6 h-6 rounded-lg bg-brand-600 text-white font-mono font-bold flex items-center justify-center text-xs">AI</div>
+                <span class="font-bold text-slate-800 dark:text-slate-200">AI Sim Lab</span>
+                <span>— Interactive Machine Learning Visualizer</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <span>Created by <strong class="text-slate-800 dark:text-slate-200 font-semibold">Raphael Randrianantoanina</strong></span>
+                <span class="text-slate-300 dark:text-slate-700">•</span>
+                <span>Crafted with math.js, Chart.js, & Tailwind CSS. Zero external servers.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           GLOBAL STATE & PRESET DATASETS
+           ========================================================================== */
+        
+        // Dark Mode Toggle
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // Built-in Sample Datasets
+        const DATASETS = {
+            ad_spend: {
+                title: "Ad Spend vs. Revenue",
+                xLabel: "Ad Spend ($k)",
+                yLabel: "Revenue ($k)",
+                data: [
+                    {x: 10, y: 25}, {x: 15, y: 28}, {x: 20, y: 36}, {x: 25, y: 40}, 
+                    {x: 30, y: 52}, {x: 35, y: 55}, {x: 40, y: 68}, {x: 45, y: 72}, 
+                    {x: 50, y: 81}, {x: 55, y: 88}, {x: 60, y: 95}
+                ]
+            },
+            housing: {
+                title: "House Size vs. Price",
+                xLabel: "Size (sq ft / 100)",
+                yLabel: "Price ($k)",
+                data: [
+                    {x: 8, y: 150}, {x: 10, y: 180}, {x: 12, y: 210}, {x: 15, y: 290}, 
+                    {x: 18, y: 380}, {x: 20, y: 450}, {x: 22, y: 530}, {x: 25, y: 680}, 
+                    {x: 28, y: 820}, {x: 30, y: 950}
+                ]
+            },
+            runge: {
+                title: "Runge Function",
+                xLabel: "X Axis",
+                yLabel: "Y Axis",
+                data: [
+                    {x: -5, y: 0.038}, {x: -4, y: 0.058}, {x: -3, y: 0.100}, {x: -2, y: 0.200}, 
+                    {x: -1, y: 0.500}, {x: 0, y: 1.000}, {x: 1, y: 0.500}, {x: 2, y: 0.200}, 
+                    {x: 3, y: 0.100}, {x: 4, y: 0.058}, {x: 5, y: 0.038}
+                ]
+            }
+        };
+
+        // App State
+        let currentData = [...DATASETS.ad_spend.data];
+        let modelFamily = 'linear'; // 'linear', 'polynomial', 'exponential'
+        let polyDegree = 2;
+        let fitMethod = 'gd'; // 'closed_form' or 'gd'
+        let learningRate = 0.05;
+        let epochSpeed = 2;
+        let currentEpoch = 0;
+        let isTrainingGD = false;
+        let gdAnimFrame = null;
+        
+        // Standardization params
+        let xMean = 0, xStd = 1;
+        
+        // Model Weights (in standardized space for GD, or raw for closed form)
+        let weights = []; // [w0, w1, w2, ...]
+        let lossHistory = [];
+
+        // Chart References
+        let regressionChart = null;
+        let lossChart = null;
+        let residualsChart = null;
+        let heroFitChart = null;
+        let heroLossChart = null;
+
+        
+        /* ==========================================================================
+           REGRESSION MATHEMATICS (Closed-Form Normal Eq & Gradient Descent)
+           ========================================================================== */
+
+        // Standardization helper
+        function calculateStats(pts) {
+            if (pts.length === 0) return { mean: 0, std: 1 };
+            const xs = pts.map(p => p.x);
+            const mean = xs.reduce((a, b) => a + b, 0) / xs.length;
+            const variance = xs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (xs.length || 1);
+            const std = Math.sqrt(variance) || 1e-5;
+            return { mean, std };
+        }
+
+        // Standardize single x
+        function stdX(x) {
+            return (x - xMean) / xStd;
+        }
+
+        // Build feature matrix row for standardized x
+        function getFeatureRowStd(xs, degree) {
+            const row = [];
+            for (let d = 0; d <= degree; d++) {
+                row.push(Math.pow(xs, d));
+            }
+            return row;
+        }
+
+        // Instant Closed-Form Solver (Normal Equation via math.js lusolve + Ridge)
+        function solveClosedForm() {
+            if (currentData.length === 0) return;
+
+            if (modelFamily === 'exponential') {
+                // Fit y = a * e^(b * x) => ln(y) = ln(a) + b * x
+                const validPts = currentData.filter(p => p.y > 0);
+                if (validPts.length < 2) return;
+
+                const X = validPts.map(p => [1, p.x]);
+                const Y = validPts.map(p => [Math.log(p.y)]);
+
+                const XT = math.transpose(X);
+                const XTX = math.multiply(XT, X);
+                const XTY = math.multiply(XT, Y);
+                
+                // Tiny ridge term for stability
+                const reg = math.multiply(1e-8, math.identity(2));
+                const A = math.add(XTX, reg);
+                const w = math.lusolve(A, XTY);
+
+                const ln_a = w[0][0];
+                const b = w[1][0];
+                weights = [Math.exp(ln_a), b]; // [a, b]
+                currentEpoch = 1;
+                lossHistory = [calculateMSE()];
+                updateChartsAndMetrics();
+                return;
+            }
+
+            const degree = (modelFamily === 'linear') ? 1 : polyDegree;
+            const stats = calculateStats(currentData);
+            xMean = stats.mean;
+            xStd = stats.std;
+
+            const X = currentData.map(p => getFeatureRowStd(stdX(p.x), degree));
+            const Y = currentData.map(p => [p.y]);
+
+            const XT = math.transpose(X);
+            const XTX = math.multiply(XT, X);
+            const XTY = math.multiply(XT, Y);
+
+            // Add ridge regularization term for high degrees (math.lusolve)
+            const ridge = math.multiply(1e-7, math.identity(degree + 1));
+            const A = math.add(XTX, ridge);
+            
+            try {
+                const wSol = math.lusolve(A, XTY);
+                weights = wSol.map(r => r[0]);
+                currentEpoch = 1;
+                lossHistory = [calculateMSE()];
+                updateChartsAndMetrics();
+                logActivity(`Closed-form solved instantly (Degree ${degree}).`);
+            } catch (err) {
+                console.error("Matrix solve error", err);
+            }
+        }
+
+        // Predict raw Y from raw X
+        function predictY(xVal) {
+            if (weights.length === 0) return 0;
+
+            if (modelFamily === 'exponential') {
+                const a = weights[0] || 1;
+                const b = weights[1] || 0;
+                return a * Math.exp(b * xVal);
+            }
+
+            const degree = (modelFamily === 'linear') ? 1 : polyDegree;
+            const xs = stdX(xVal);
+            let yHat = 0;
+            for (let d = 0; d <= degree; d++) {
+                yHat += (weights[d] || 0) * Math.pow(xs, d);
+            }
+            return yHat;
+        }
+
+        // Single Step Gradient Descent
+        function stepGD() {
+            if (currentData.length === 0 || modelFamily === 'exponential') return;
+
+            const degree = (modelFamily === 'linear') ? 1 : polyDegree;
+            const n = currentData.length;
+
+            if (weights.length !== degree + 1) {
+                weights = new Array(degree + 1).fill(0);
+            }
+
+            // Predictions & Residuals
+            const yHats = currentData.map(p => predictY(p.x));
+            const errors = yHats.map((yHat, i) => yHat - currentData[i].y);
+
+            // Gradient per weight parameter
+            const grads = new Array(degree + 1).fill(0);
+            for (let i = 0; i < n; i++) {
+                const xs = stdX(currentData[i].x);
+                const err = errors[i];
+                for (let d = 0; d <= degree; d++) {
+                    grads[d] += (2 / n) * err * Math.pow(xs, d);
+                }
+            }
+
+            // Weight Update
+            for (let d = 0; d <= degree; d++) {
+                weights[d] -= learningRate * grads[d];
+            }
+
+            currentEpoch++;
+            const mse = calculateMSE();
+            lossHistory.push(mse);
+        }
+
+        // Calculate Mean Squared Error
+        function calculateMSE() {
+            if (currentData.length === 0) return 0;
+            let sumSq = 0;
+            for (let p of currentData) {
+                sumSq += Math.pow(p.y - predictY(p.x), 2);
+            }
+            return sumSq / currentData.length;
+        }
+
+        // Calculate R^2 Score
+        function calculateR2() {
+            if (currentData.length === 0) return 0;
+            const yVals = currentData.map(p => p.y);
+            const yMean = yVals.reduce((a, b) => a + b, 0) / yVals.length;
+            
+            let ssRes = 0;
+            let ssTot = 0;
+            for (let p of currentData) {
+                ssRes += Math.pow(p.y - predictY(p.x), 2);
+                ssTot += Math.pow(p.y - yMean, 2);
+            }
+            if (ssTot === 0) return 1;
+            const r2 = 1 - (ssRes / ssTot);
+            return Math.max(0, r2);
+        }
+
+
+        /* ==========================================================================
+           CHART.JS RENDERING & WORKSPACE UI
+           ========================================================================== */
+
+        function initCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            const fontColor = isDark ? '#94a3b8' : '#64748b';
+
+            // 1. Main Regression Chart
+            const ctxReg = document.getElementById('regressionChart').getContext('2d');
+            regressionChart = new Chart(ctxReg, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Data Points',
+                            data: currentData,
+                            backgroundColor: '#3b82f6',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Fitted Curve',
+                            data: [],
+                            type: 'line',
+                            borderColor: '#10b981',
+                            borderWidth: 3,
+                            fill: false,
+                            pointRadius: 0,
+                            tension: 0.2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: handleChartClick,
+                    scales: {
+                        x: { grid: { color: gridColor }, ticks: { color: fontColor } },
+                        y: { grid: { color: gridColor }, ticks: { color: fontColor } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 2. Mini Loss Chart
+            const ctxLoss = document.getElementById('lossChart').getContext('2d');
+            lossChart = new Chart(ctxLoss, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        borderColor: '#f59e0b',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { display: false },
+                        y: { grid: { color: gridColor }, ticks: { color: fontColor, font: { size: 9 } } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 3. Residuals Bar Chart
+            const ctxRes = document.getElementById('residualsChart').getContext('2d');
+            residualsChart = new Chart(ctxRes, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Residual |y - yHat|',
+                        data: [],
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: fontColor, font: { size: 9 } } },
+                        y: { grid: { color: gridColor }, ticks: { color: fontColor, font: { size: 9 } } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Hero Live Preview Charts
+            initHeroCharts();
+            
+            // Initial solve
+            resetGDWeights();
+            updateChartsAndMetrics();
+        }
+
+        // Handle Click on Regression Chart (Add / Remove Points)
+        function handleChartClick(evt) {
+            const points = regressionChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+            if (points.length > 0) {
+                // Clicked an existing point -> Remove it
+                const index = points[0].index;
+                currentData.splice(index, 1);
+                logActivity(`Removed data point at index ${index}.`);
+            } else {
+                // Clicked empty area -> Add new point
+                const canvasPosition = Chart.helpers.getRelativePosition(evt, regressionChart);
+                const dataX = regressionChart.scales.x.getValueForPixel(canvasPosition.x);
+                const dataY = regressionChart.scales.y.getValueForPixel(canvasPosition.y);
+                if (dataX !== undefined && dataY !== undefined) {
+                    currentData.push({ x: parseFloat(dataX.toFixed(2)), y: parseFloat(dataY.toFixed(2)) });
+                    logActivity(`Added point (${dataX.toFixed(1)}, ${dataY.toFixed(1)}).`);
+                }
+            }
+            const stats = calculateStats(currentData);
+            xMean = stats.mean;
+            xStd = stats.std;
+
+            if (fitMethod === 'closed_form') solveClosedForm();
+            else updateChartsAndMetrics();
+        }
+
+        // Update Chart Curves, Residuals, and Equation Readouts
+
+function updateChartsAndMetrics() {
+    if (!regressionChart) return;
+
+    // Update Point Data
+    regressionChart.data.datasets[0].data = currentData;
+
+    // Generate Fitted Curve Line
+    if (currentData.length > 0) {
+        const xs = currentData.map(p => p.x);
+        const minX = Math.min(...xs) - 5;
+        const maxX = Math.max(...xs) + 5;
+        const curvePts = [];
+        const steps = 60;
+        for (let i = 0; i <= steps; i++) {
+            const x = minX + (i / steps) * (maxX - minX);
+            curvePts.push({ x: x, y: predictY(x) });
+        }
+        regressionChart.data.datasets[1].data = curvePts;
+    }
+
+    regressionChart.update('none');
+
+    // Update Loss Chart
+    lossChart.data.labels = lossHistory.map((_, i) => i);
+    lossChart.data.datasets[0].data = lossHistory;
+    lossChart.update('none');
+
+    // Update Residuals Bar Chart
+    const residuals = currentData.map(p => Math.abs(p.y - predictY(p.x)));
+    residualsChart.data.labels = currentData.map((_, i) => `P${i+1}`);
+    residualsChart.data.datasets[0].data = residuals;
+    residualsChart.update('none');
+
+    // Text Readouts
+    const mse = calculateMSE();
+    const r2 = calculateR2();
+    document.getElementById('mseMetric').innerText = mse.toFixed(4);
+    document.getElementById('r2Metric').innerText = r2.toFixed(3);
+    document.getElementById('currentLossDisplay').innerText = mse.toFixed(4);
+    document.getElementById('mainEpochCount').innerText = currentEpoch;
+    document.getElementById('pointCountBadge').innerText = `${currentData.length} points`;
+
+    // Equation Display
+    let eqText = "";
+
+    if (modelFamily === 'exponential') {
+        const a = (weights[0] || 1).toFixed(2);
+        const b = (weights[1] || 0).toFixed(3);
+        eqText = `y = ${a} \\cdot e^{${b} \\cdot x}`;
+    } else {
+        // Format polynomial terms cleanly with correct +/- signs
+        const terms = weights.map((w, i) => {
+            const val = w || 0;
+            const absVal = Math.abs(val).toFixed(2);
+            const sign = val < 0 ? '-' : '+';
+            
+            let termStr = "";
+            if (i === 0) {
+                termStr = val < 0 ? `-${absVal}` : `${absVal}`;
+            } else if (i === 1) {
+                termStr = `${sign} ${absVal} \\cdot x_{\\text{std}}`;
+            } else {
+                termStr = `${sign} ${absVal} \\cdot x_{\\text{std}}^{${i}}`;
+            }
+            return termStr;
+        });
+
+        eqText = `y = ${terms.join(' ')}`;
+    }
+
+    const displayEl = document.getElementById('modelEquationDisplay');
+
+    // Set text enclosed in LaTeX inline delimiters
+    displayEl.innerHTML = `\\(${eqText}\\)`;
+
+    // Trigger MathJax typesetting asynchronously safely
+    if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+        MathJax.typesetPromise([displayEl]).catch((err) => console.log(err));
+    }
+
+    runPrediction();
+}
+        // Training Loop Controller
+        function toggleTraining() {
+            if (fitMethod === 'closed_form') {
+                setFitMethod('gd');
+            }
+
+            isTrainingGD = !isTrainingGD;
+            const btnText = document.getElementById('trainBtnText');
+            if (isTrainingGD) {
+                btnText.innerText = "Pause GD";
+                logActivity("Started animated Gradient Descent loop.");
+                runGDFrames();
+            } else {
+                btnText.innerText = "Train GD";
+                logActivity("Paused Gradient Descent loop.");
+                if (gdAnimFrame) cancelAnimationFrame(gdAnimFrame);
+            }
+        }
+
+        function runGDFrames() {
+            if (!isTrainingGD) return;
+
+            for (let i = 0; i < epochSpeed; i++) {
+                stepGD();
+            }
+            updateChartsAndMetrics();
+            gdAnimFrame = requestAnimationFrame(runGDFrames);
+        }
+
+        function stepGDEpoch() {
+            stepGD();
+            updateChartsAndMetrics();
+            logActivity(`Advanced 1 GD Epoch (Total: ${currentEpoch}).`);
+        }
+
+        function resetGDWeights() {
+            const stats = calculateStats(currentData);
+            xMean = stats.mean;
+            xStd = stats.std;
+
+            const deg = (modelFamily === 'linear') ? 1 : polyDegree;
+            weights = new Array(deg + 1).fill(0);
+            currentEpoch = 0;
+            lossHistory = [calculateMSE()];
+            if (isTrainingGD) toggleTraining();
+            updateChartsAndMetrics();
+            logActivity("Reset weights and epoch counter to 0.");
+        }
+
+        function setModelFamily(family) {
+            modelFamily = family;
+            document.querySelectorAll('.model-btn').forEach(b => {
+                b.classList.remove('border-brand-500', 'bg-brand-50', 'dark:bg-brand-950/50', 'text-brand-600', 'dark:text-brand-400');
+                b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-400');
+            });
+            const activeBtn = family === 'linear' ? 'btnLinear' : family === 'polynomial' ? 'btnPoly' : 'btnExp';
+            document.getElementById(activeBtn).classList.add('border-brand-500', 'bg-brand-50', 'dark:bg-brand-950/50', 'text-brand-600', 'dark:text-brand-400');
+
+            document.getElementById('polyDegreeContainer').style.display = family === 'polynomial' ? 'block' : 'none';
+
+            resetGDWeights();
+            if (fitMethod === 'closed_form') solveClosedForm();
+        }
+
+        function setFitMethod(method) {
+            fitMethod = method;
+            document.querySelectorAll('.fit-btn').forEach(b => {
+                b.classList.remove('border-brand-500', 'bg-brand-50', 'dark:bg-brand-950/50', 'text-brand-600', 'dark:text-brand-400');
+                b.classList.add('border-slate-200', 'dark:border-slate-700', 'text-slate-600', 'dark:text-slate-400');
+            });
+            const activeBtn = method === 'closed_form' ? 'btnClosedForm' : 'btnGD';
+            document.getElementById(activeBtn).classList.add('border-brand-500', 'bg-brand-50', 'dark:bg-brand-950/50', 'text-brand-600', 'dark:text-brand-400');
+
+            if (method === 'closed_form') {
+                if (isTrainingGD) toggleTraining();
+                solveClosedForm();
+            } else {
+                resetGDWeights();
+            }
+        }
+
+        function updateDegree(val) {
+            polyDegree = parseInt(val);
+            document.getElementById('polyDegreeVal').innerText = polyDegree;
+            resetGDWeights();
+            if (fitMethod === 'closed_form') solveClosedForm();
+        }
+
+        function updateLR(val) {
+            learningRate = parseFloat(val);
+            document.getElementById('lrVal').innerText = learningRate.toFixed(3);
+        }
+
+        function updateSpeed(val) {
+            epochSpeed = parseInt(val);
+            document.getElementById('speedVal').innerText = `${epochSpeed} epochs / frame`;
+        }
+
+        function loadPresetDataset(key) {
+            if (key === 'custom') return;
+            currentData = [...DATASETS[key].data];
+            resetGDWeights();
+            if (fitMethod === 'closed_form') solveClosedForm();
+            logActivity(`Loaded preset dataset: ${DATASETS[key].title}.`);
+        }
+
+        function clearAllDataPoints() {
+            currentData = [];
+            resetGDWeights();
+            logActivity("Cleared all data points from workspace.");
+        }
+
+        function runPrediction() {
+            const xInput = parseFloat(document.getElementById('predictInputX').value) || 0;
+            const predY = predictY(xInput);
+            document.getElementById('predictResultY').innerText = predY.toFixed(2);
+        }
+
+        function logActivity(msg) {
+            const logContainer = document.getElementById('activityLog');
+            const entry = document.createElement('div');
+            entry.innerText = `[${new Date().toLocaleTimeString().split(' ')[0]}] ${msg}`;
+            logContainer.prepend(entry);
+        }
+
+
+        /* ==========================================================================
+           BONUS: PERCEPTRON LAB (BINARY CLASSIFICATION)
+           ========================================================================== */
+
+        let perceptronPoints = [
+            {x: 20, y: 30, c: 1}, {x: 25, y: 45, c: 1}, {x: 30, y: 25, c: 1}, {x: 35, y: 50, c: 1},
+            {x: 60, y: 70, c: -1}, {x: 65, y: 85, c: -1}, {x: 75, y: 65, c: -1}, {x: 80, y: 90, c: -1}
+        ];
+        let currentPerceptronClass = 1;
+        let pWeights = [0.1, -0.1, 0.0]; // [w1, w2, bias]
+        let percEpoch = 0;
+        let isPerceptronTraining = false;
+        let percAnimFrame = null;
+        let perceptronChart = null;
+
+        function initPerceptronChart() {
+            const ctx = document.getElementById('perceptronChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+            perceptronChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        { label: 'Class A (+1)', data: [], backgroundColor: '#3b82f6', pointRadius: 7 },
+                        { label: 'Class B (-1)', data: [], backgroundColor: '#f59e0b', pointRadius: 7 },
+                        { label: 'Boundary', data: [], type: 'line', borderColor: '#10b981', borderWidth: 3, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: handlePerceptronChartClick,
+                    scales: {
+                        x: { min: 0, max: 100, grid: { color: gridColor } },
+                        y: { min: 0, max: 100, grid: { color: gridColor } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            updatePerceptronChart();
+        }
+
+        function handlePerceptronChartClick(evt) {
+            const canvasPos = Chart.helpers.getRelativePosition(evt, perceptronChart);
+            const x = perceptronChart.scales.x.getValueForPixel(canvasPos.x);
+            const y = perceptronChart.scales.y.getValueForPixel(canvasPos.y);
+            if (x !== undefined && y !== undefined) {
+                perceptronPoints.push({ x: parseFloat(x.toFixed(1)), y: parseFloat(y.toFixed(1)), c: currentPerceptronClass });
+                updatePerceptronChart();
+            }
+        }
+
+        function setPerceptronClass(cls) {
+            currentPerceptronClass = cls;
+            document.getElementById('btnClassA').className = cls === 1 ? 
+                'py-2 px-3 text-xs font-bold rounded-xl border border-blue-500 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center gap-2' :
+                'py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2';
+            document.getElementById('btnClassB').className = cls === -1 ? 
+                'py-2 px-3 text-xs font-bold rounded-xl border border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center gap-2' :
+                'py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2';
+        }
+
+
+
+        function togglePerceptronTraining() {
+            isPerceptronTraining = !isPerceptronTraining;
+            const btnText = document.getElementById('percTrainBtnText');
+            if (isPerceptronTraining) {
+                btnText.innerText = "Pause Perceptron";
+                document.getElementById('percStatus').innerText = "Training...";
+                runPerceptronLoop();
+            } else {
+                btnText.innerText = "Train Perceptron Live";
+                document.getElementById('percStatus').innerText = "Paused";
+                if (percAnimFrame) cancelAnimationFrame(percAnimFrame);
+            }
+        }
+
+        function runPerceptronLoop() {
+            if (!isPerceptronTraining) return;
+
+            const converged = stepPerceptronEpoch();
+            updatePerceptronChart();
+
+            if (converged || percEpoch >= 200) {
+                isPerceptronTraining = false;
+                document.getElementById('percTrainBtnText').innerText = "Train Perceptron Live";
+                document.getElementById('percStatus').innerText = converged ? "Separated!" : "Max Epochs";
+                return;
+            }
+
+            percAnimFrame = requestAnimationFrame(runPerceptronLoop);
+        }
+
+        function updatePerceptronChart() {
+            if (!perceptronChart) return;
+
+            const classA = perceptronPoints.filter(p => p.c === 1);
+            const classB = perceptronPoints.filter(p => p.c === -1);
+
+            perceptronChart.data.datasets[0].data = classA;
+            perceptronChart.data.datasets[1].data = classB;
+
+            // Generate Boundary Line: w1*x + w2*y + b = 0 => y = (-w1*x - b) / w2
+            const boundaryPts = [];
+            const w1 = pWeights[0], w2 = pWeights[1], b = pWeights[2];
+
+            if (Math.abs(w2) > 1e-4) {
+                const y0 = (-w1 * 0 - b) / w2;
+                const y100 = (-w1 * 100 - b) / w2;
+                boundaryPts.push({x: 0, y: y0}, {x: 100, y: y100});
+            }
+
+            perceptronChart.data.datasets[2].data = boundaryPts;
+            perceptronChart.update('none');
+
+            document.getElementById('percW1Display').innerText = w1.toFixed(2);
+            document.getElementById('percW2Display').innerText = w2.toFixed(2);
+            document.getElementById('percBDisplay').innerText = b.toFixed(2);
+            document.getElementById('percEpochCount').innerText = percEpoch;
+            document.getElementById('percPointCount').innerText = `${perceptronPoints.length} points`;
+        }
+
+        function loadPerceptronPreset() {
+            perceptronPoints = [
+                {x: 20, y: 30, c: 1}, {x: 25, y: 45, c: 1}, {x: 30, y: 25, c: 1}, {x: 35, y: 50, c: 1},
+                {x: 60, y: 70, c: -1}, {x: 65, y: 85, c: -1}, {x: 75, y: 65, c: -1}, {x: 80, y: 90, c: -1}
+            ];
+            pWeights = [0.1, -0.1, 0.0];
+            percEpoch = 0;
+            if (isPerceptronTraining) togglePerceptronTraining();
+            updatePerceptronChart();
+        }
+
+        function clearPerceptronPoints() {
+            perceptronPoints = [];
+            pWeights = [0.1, -0.1, 0.0];
+            percEpoch = 0;
+            if (isPerceptronTraining) togglePerceptronTraining();
+            updatePerceptronChart();
+        }
+
+
+        /* ==========================================================================
+           PAPAPARSE CSV IMPORT & EXPORT
+           ========================================================================== */
+
+        function openImportModal() {
+            document.getElementById('csvModal').classList.remove('hidden');
+        }
+
+        function closeImportModal() {
+            document.getElementById('csvModal').classList.add('hidden');
+        }
+
+        function handleFileSelect(evt) {
+            const file = evt.target.files[0];
+            if (file) {
+                document.getElementById('fileFileName').innerText = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('csvPasteArea').value = e.target.result;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseAndLoadCSV() {
+            const text = document.getElementById('csvPasteArea').value;
+            if (!text.trim()) return;
+
+            Papa.parse(text, {
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const rows = results.data;
+                    const parsedData = [];
+                    for (let row of rows) {
+                        if (row.length >= 2 && typeof row[0] === 'number' && typeof row[1] === 'number') {
+                            parsedData.push({ x: row[0], y: row[1] });
+                        }
+                    }
+
+                    if (parsedData.length > 0) {
+                        currentData = parsedData;
+                        document.getElementById('datasetSelect').value = 'custom';
+                        resetGDWeights();
+                        if (fitMethod === 'closed_form') solveClosedForm();
+                        closeImportModal();
+                        logActivity(`Successfully imported ${parsedData.length} points via CSV.`);
+                    } else {
+                        alert("Could not find valid numeric x,y columns in CSV.");
+                    }
+                }
+            });
+        }
+
+        function exportDatasetCSV() {
+            const csv = Papa.unparse(currentData);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", "ai_sim_lab_dataset.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            logActivity("Exported current dataset as CSV file.");
+        }
+
+
+        /* ==========================================================================
+           HERO SECTION LIVE ANIMATION WIDGET
+           ========================================================================== */
+
+        function initHeroCharts() {
+            const ctx1 = document.getElementById('heroFitChart').getContext('2d');
+            const ctx2 = document.getElementById('heroLossChart').getContext('2d');
+
+            const heroData = DATASETS.housing.data;
+            let heroWeights = [0, 0, 0];
+            let heroEpoch = 0;
+            let heroLosses = [];
+
+            heroFitChart = new Chart(ctx1, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        { data: heroData, backgroundColor: '#3b82f6', pointRadius: 4 },
+                        { data: [], type: 'line', borderColor: '#10b981', borderWidth: 2, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { display: false }, y: { display: false } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            heroLossChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{ data: [], borderColor: '#f59e0b', borderWidth: 2, pointRadius: 0 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { display: false }, y: { display: false } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Loop hero preview animation
+            setInterval(() => {
+                heroEpoch++;
+                if (heroEpoch > 80) {
+                    heroEpoch = 0;
+                    heroWeights = [0, 0, 0];
+                    heroLosses = [];
+                }
+
+                // Mini GD step
+                const n = heroData.length;
+                const xs = heroData.map(p => (p.x - 18) / 8);
+                const ys = heroData.map(p => p.y);
+                let mse = 0;
+
+                for (let i = 0; i < n; i++) {
+                    const yHat = heroWeights[0] + heroWeights[1] * xs[i] + heroWeights[2] * Math.pow(xs[i], 2);
+                    const err = yHat - ys[i];
+                    mse += err * err;
+                    heroWeights[0] -= 0.03 * (2/n) * err;
+                    heroWeights[1] -= 0.03 * (2/n) * err * xs[i];
+                    heroWeights[2] -= 0.03 * (2/n) * err * Math.pow(xs[i], 2);
+                }
+                mse /= n;
+                heroLosses.push(mse);
+
+                // Update Hero fit curve
+                const linePts = [];
+                for (let x = 5; x <= 32; x += 2) {
+                    const xStdVal = (x - 18) / 8;
+                    const yVal = heroWeights[0] + heroWeights[1] * xStdVal + heroWeights[2] * Math.pow(xStdVal, 2);
+                    linePts.push({ x: x, y: yVal });
+                }
+
+                heroFitChart.data.datasets[1].data = linePts;
+                heroFitChart.update('none');
+
+                heroLossChart.data.labels = heroLosses.map((_, i) => i);
+                heroLossChart.data.datasets[0].data = heroLosses;
+                heroLossChart.update('none');
+
+                document.getElementById('heroEpochCounter').innerText = heroEpoch;
+                document.getElementById('heroLossValue').innerText = mse.toFixed(2);
+            }, 80);
+        }
+
+        // On Page Load Initialization
+        window.onload = function() {
+            initCharts();
+            initPerceptronChart();
+        };
+    </script>
+</body>
+</html>
