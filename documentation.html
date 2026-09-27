@@ -10,15 +10,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
    
-    
     <script>
-  window.MathJax = {
-    tex: {
-      inlineMath: [['\\(', '\\)'], ['$', '$']]
-    }
-  };
-</script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['\\(', '\\)'], ['$', '$']]
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -149,9 +149,7 @@
             <div class="flex items-center space-x-3">
                 <!-- Theme Toggle Button -->
                 <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition" title="Toggle Theme">
-                    <!-- Sun Icon -->
                     <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <!-- Moon Icon -->
                     <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </button>
 
@@ -169,7 +167,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 
-                <!-- Hero Left Column -->
                 <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs font-semibold font-mono">
                         <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
@@ -194,7 +191,6 @@
                         </a>
                     </div>
 
-                    <!-- Highlights row -->
                     <div class="pt-4 grid grid-cols-3 gap-4 border-t border-slate-200 dark:border-darkborder text-left">
                         <div>
                             <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">0 ms</div>
@@ -211,7 +207,6 @@
                     </div>
                 </div>
 
-                <!-- Hero Right Column: Animated Live Demo Preview Widget -->
                 <div class="lg:col-span-6">
                     <div class="rounded-2xl p-5 bg-white/90 dark:bg-darkcard/90 border border-slate-200 dark:border-darkborder shadow-2xl shadow-blue-500/10 space-y-4">
                         <div class="flex items-center justify-between border-b border-slate-100 dark:border-darkborder pb-3">
@@ -226,7 +221,6 @@
                             </span>
                         </div>
 
-                        <!-- Mini Canvas Container -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 h-52">
                             <div class="relative bg-slate-50 dark:bg-slate-900/60 rounded-xl p-2 border border-slate-200/60 dark:border-slate-800">
                                 <div class="text-[11px] font-mono font-medium text-slate-500 mb-1">Fitting Model Curve</div>
@@ -267,7 +261,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Feature 1 -->
                 <div class="glass-panel p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder hover:border-brand-500/50 hover:shadow-xl hover:shadow-brand-500/10 transition group">
                     <div class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -278,7 +271,6 @@
                     </p>
                 </div>
 
-                <!-- Feature 2 -->
                 <div class="glass-panel p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/10 transition group">
                     <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
@@ -289,7 +281,6 @@
                     </p>
                 </div>
 
-                <!-- Feature 3 -->
                 <div class="glass-panel p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/10 transition group">
                     <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
@@ -300,7 +291,6 @@
                     </p>
                 </div>
 
-                <!-- Feature 4 -->
                 <div class="glass-panel p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/10 transition group">
                     <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
@@ -323,28 +313,24 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-                <!-- Step 1 -->
                 <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder shadow-sm">
                     <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 mb-2">STEP 01</div>
                     <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">Pick or Draw Data</h4>
                     <p class="text-xs text-slate-600 dark:text-slate-400">Select built-in datasets (Ad Spend, Housing, Runge) or click the plot area to place custom data points.</p>
                 </div>
 
-                <!-- Step 2 -->
                 <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder shadow-sm">
                     <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 mb-2">STEP 02</div>
                     <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">Select Model & Degree</h4>
                     <p class="text-xs text-slate-600 dark:text-slate-400">Choose Linear, Polynomial (Degree 1 through 6), or Exponential model families to evaluate capacity.</p>
                 </div>
 
-                <!-- Step 3 -->
                 <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder shadow-sm">
                     <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 mb-2">STEP 03</div>
                     <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">Watch GD Learn</h4>
                     <p class="text-xs text-slate-600 dark:text-slate-400">Press Train and watch learning rate sliders control epoch-by-epoch convergence and loss reduction.</p>
                 </div>
 
-                <!-- Step 4 -->
                 <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200/80 dark:border-darkborder shadow-sm">
                     <div class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 mb-2">STEP 04</div>
                     <h4 class="text-base font-bold text-slate-900 dark:text-white mb-2">Inspect & Predict</h4>
@@ -368,7 +354,6 @@
     <section id="simulator" class="py-12 relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             
-            <!-- Section Title Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-darkborder pb-6">
                 <div>
                     <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
@@ -390,7 +375,7 @@
                 </div>
             </div>
 
-            <!-- Workspace Top Grid: Controls (Panel 1) & Charts (Panel 2) -->
+            <!-- Workspace Top Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 <!-- Panel 1: Setup & Controls -->
@@ -427,8 +412,8 @@
                         </div>
                     </div>
 
-                    <!-- Degree Slider (Conditional) -->
-                    <div id="polyDegreeContainer" class="space-y-1.5">
+                    <!-- Degree Slider -->
+                    <div id="polyDegreeContainer" class="space-y-1.5" style="display: none;">
                         <div class="flex justify-between items-center text-xs">
                             <span class="font-semibold text-slate-700 dark:text-slate-300">Polynomial Degree (d)</span>
                             <span id="polyDegreeVal" class="font-mono font-bold text-brand-600 dark:text-brand-400">2</span>
@@ -456,7 +441,6 @@
 
                     <!-- Hyperparameters for GD -->
                     <div id="gdHyperparamsContainer" class="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800 space-y-3">
-                        <!-- Learning Rate -->
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs">
                                 <span class="font-medium text-slate-600 dark:text-slate-400">Learning Rate (&eta;)</span>
@@ -465,7 +449,6 @@
                             <input id="lrSlider" type="range" min="0.001" max="0.30" step="0.005" value="0.05" oninput="updateLR(this.value)" class="w-full accent-brand-600">
                         </div>
 
-                        <!-- Speed / Steps per Frame -->
                         <div class="space-y-1">
                             <div class="flex justify-between text-xs">
                                 <span class="font-medium text-slate-600 dark:text-slate-400">Epoch Speed</span>
@@ -477,17 +460,15 @@
 
                     <!-- Point Editing Buttons -->
                     <div class="pt-2 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-darkborder">
-                        <span class="text-xs text-slate-500">Canvas interaction: Click canvas to add point.</span>
+                        <span class="text-xs text-slate-500">Canvas: Click to add/remove points.</span>
                         <button onclick="clearAllDataPoints()" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 hover:bg-red-100 transition whitespace-nowrap">
                             Clear Data
                         </button>
                     </div>
                 </div>
 
-                <!-- Panel 2: Main Scatter & Fitted Curve Chart + Loss Curve -->
+                <!-- Panel 2: Scatter Plot & Fitting Canvas -->
                 <div class="lg:col-span-8 flex flex-col space-y-4">
-                    
-                    <!-- Top Main Canvas Card -->
                     <div class="bg-white dark:bg-darkcard rounded-2xl p-5 border border-slate-200 dark:border-darkborder shadow-sm flex-1 flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center space-x-2">
@@ -497,20 +478,17 @@
                                 </span>
                             </div>
                             <div class="text-xs font-mono text-slate-500">
-                                Model: <span id="modelEquationDisplay" class="font-semibold text-brand-600 dark:text-brand-400">y = w0 + w1*x</span>
+                                Model: <span id="modelEquationDisplay" class="font-semibold text-brand-600 dark:text-brand-400">\(y = w_0 + w_1 \cdot x\)</span>
                             </div>
                         </div>
 
-                        <!-- Scatter Chart Element -->
                         <div class="h-72 sm:h-80 relative w-full">
                             <canvas id="regressionChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- Panel 3: Training Control Bar & Mini Loss Chart -->
+                    <!-- Panel 3: Loop Controls & Mini Loss Chart -->
                     <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                        
-                        <!-- Training Control Bar -->
                         <div class="sm:col-span-6 bg-white dark:bg-darkcard rounded-2xl p-4 border border-slate-200 dark:border-darkborder shadow-sm flex flex-col justify-between space-y-3">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-bold font-mono text-slate-500 uppercase">3. Optimization Loop</span>
@@ -531,7 +509,6 @@
                             </div>
                         </div>
 
-                        <!-- Mini Real-time Loss Chart -->
                         <div class="sm:col-span-6 bg-white dark:bg-darkcard rounded-2xl p-4 border border-slate-200 dark:border-darkborder shadow-sm flex flex-col justify-between">
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-xs font-bold font-mono text-slate-500 uppercase">Loss (MSE)</span>
@@ -541,13 +518,12 @@
                                 <canvas id="lossChart"></canvas>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
             </div>
 
-            <!-- Workspace Bottom Grid: Prediction Tool (Panel 4) & Metrics/Residuals (Panel 5) -->
+            <!-- Workspace Bottom Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 <!-- Panel 4: Test & Prediction Tool -->
@@ -583,12 +559,10 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
-                        <!-- Residuals Bar Chart -->
                         <div class="sm:col-span-7 h-44 relative">
                             <canvas id="residualsChart"></canvas>
                         </div>
 
-                        <!-- Activity Log Stream -->
                         <div class="sm:col-span-5 bg-slate-50 dark:bg-slate-900/80 rounded-xl p-3 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
                             <div class="text-[11px] font-mono font-bold text-slate-500 uppercase mb-2">Training Activity Log</div>
                             <div id="activityLog" class="h-32 overflow-y-auto font-mono text-[11px] space-y-1 custom-scrollbar text-slate-600 dark:text-slate-400 pr-1">
@@ -603,7 +577,7 @@
         </div>
     </section>
 
-    <!-- BONUS SECTION: PERCEPTRON LAB (BINARY CLASSIFICATION) -->
+    <!-- SECTION: PERCEPTRON LAB (BINARY CLASSIFICATION) -->
     <section id="perceptron-lab" class="py-16 relative z-10 bg-slate-100/50 dark:bg-slate-900/40 border-t border-slate-200/60 dark:border-darkborder/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             
@@ -750,12 +724,10 @@
            GLOBAL STATE & PRESET DATASETS
            ========================================================================== */
         
-        // Dark Mode Toggle
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
         }
 
-        // Built-in Sample Datasets
         const DATASETS = {
             ad_spend: {
                 title: "Ad Spend vs. Revenue",
@@ -791,9 +763,9 @@
 
         // App State
         let currentData = [...DATASETS.ad_spend.data];
-        let modelFamily = 'linear'; // 'linear', 'polynomial', 'exponential'
+        let modelFamily = 'linear'; 
         let polyDegree = 2;
-        let fitMethod = 'gd'; // 'closed_form' or 'gd'
+        let fitMethod = 'gd'; 
         let learningRate = 0.05;
         let epochSpeed = 2;
         let currentEpoch = 0;
@@ -803,8 +775,8 @@
         // Standardization params
         let xMean = 0, xStd = 1;
         
-        // Model Weights (in standardized space for GD, or raw for closed form)
-        let weights = []; // [w0, w1, w2, ...]
+        // Model Weights
+        let weights = [];
         let lossHistory = [];
 
         // Chart References
@@ -816,10 +788,9 @@
 
         
         /* ==========================================================================
-           REGRESSION MATHEMATICS (Closed-Form Normal Eq & Gradient Descent)
+           REGRESSION MATHEMATICS
            ========================================================================== */
 
-        // Standardization helper
         function calculateStats(pts) {
             if (pts.length === 0) return { mean: 0, std: 1 };
             const xs = pts.map(p => p.x);
@@ -829,12 +800,10 @@
             return { mean, std };
         }
 
-        // Standardize single x
         function stdX(x) {
             return (x - xMean) / xStd;
         }
 
-        // Build feature matrix row for standardized x
         function getFeatureRowStd(xs, degree) {
             const row = [];
             for (let d = 0; d <= degree; d++) {
@@ -843,12 +812,10 @@
             return row;
         }
 
-        // Instant Closed-Form Solver (Normal Equation via math.js lusolve + Ridge)
         function solveClosedForm() {
             if (currentData.length === 0) return;
 
             if (modelFamily === 'exponential') {
-                // Fit y = a * e^(b * x) => ln(y) = ln(a) + b * x
                 const validPts = currentData.filter(p => p.y > 0);
                 if (validPts.length < 2) return;
 
@@ -859,14 +826,13 @@
                 const XTX = math.multiply(XT, X);
                 const XTY = math.multiply(XT, Y);
                 
-                // Tiny ridge term for stability
                 const reg = math.multiply(1e-8, math.identity(2));
                 const A = math.add(XTX, reg);
                 const w = math.lusolve(A, XTY);
 
                 const ln_a = w[0][0];
                 const b = w[1][0];
-                weights = [Math.exp(ln_a), b]; // [a, b]
+                weights = [Math.exp(ln_a), b];
                 currentEpoch = 1;
                 lossHistory = [calculateMSE()];
                 updateChartsAndMetrics();
@@ -874,6 +840,8 @@
             }
 
             const degree = (modelFamily === 'linear') ? 1 : polyDegree;
+            if (currentData.length < degree + 1) return;
+
             const stats = calculateStats(currentData);
             xMean = stats.mean;
             xStd = stats.std;
@@ -885,7 +853,6 @@
             const XTX = math.multiply(XT, X);
             const XTY = math.multiply(XT, Y);
 
-            // Add ridge regularization term for high degrees (math.lusolve)
             const ridge = math.multiply(1e-7, math.identity(degree + 1));
             const A = math.add(XTX, ridge);
             
@@ -901,7 +868,6 @@
             }
         }
 
-        // Predict raw Y from raw X
         function predictY(xVal) {
             if (weights.length === 0) return 0;
 
@@ -920,7 +886,6 @@
             return yHat;
         }
 
-        // Single Step Gradient Descent
         function stepGD() {
             if (currentData.length === 0 || modelFamily === 'exponential') return;
 
@@ -931,11 +896,9 @@
                 weights = new Array(degree + 1).fill(0);
             }
 
-            // Predictions & Residuals
             const yHats = currentData.map(p => predictY(p.x));
             const errors = yHats.map((yHat, i) => yHat - currentData[i].y);
 
-            // Gradient per weight parameter
             const grads = new Array(degree + 1).fill(0);
             for (let i = 0; i < n; i++) {
                 const xs = stdX(currentData[i].x);
@@ -945,7 +908,6 @@
                 }
             }
 
-            // Weight Update
             for (let d = 0; d <= degree; d++) {
                 weights[d] -= learningRate * grads[d];
             }
@@ -955,7 +917,6 @@
             lossHistory.push(mse);
         }
 
-        // Calculate Mean Squared Error
         function calculateMSE() {
             if (currentData.length === 0) return 0;
             let sumSq = 0;
@@ -965,7 +926,6 @@
             return sumSq / currentData.length;
         }
 
-        // Calculate R^2 Score
         function calculateR2() {
             if (currentData.length === 0) return 0;
             const yVals = currentData.map(p => p.y);
@@ -992,7 +952,6 @@
             const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
             const fontColor = isDark ? '#94a3b8' : '#64748b';
 
-            // 1. Main Regression Chart
             const ctxReg = document.getElementById('regressionChart').getContext('2d');
             regressionChart = new Chart(ctxReg, {
                 type: 'scatter',
@@ -1029,7 +988,6 @@
                 }
             });
 
-            // 2. Mini Loss Chart
             const ctxLoss = document.getElementById('lossChart').getContext('2d');
             lossChart = new Chart(ctxLoss, {
                 type: 'line',
@@ -1054,7 +1012,6 @@
                 }
             });
 
-            // 3. Residuals Bar Chart
             const ctxRes = document.getElementById('residualsChart').getContext('2d');
             residualsChart = new Chart(ctxRes, {
                 type: 'bar',
@@ -1077,24 +1034,18 @@
                 }
             });
 
-            // Hero Live Preview Charts
             initHeroCharts();
-            
-            // Initial solve
             resetGDWeights();
             updateChartsAndMetrics();
         }
 
-        // Handle Click on Regression Chart (Add / Remove Points)
         function handleChartClick(evt) {
             const points = regressionChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
             if (points.length > 0) {
-                // Clicked an existing point -> Remove it
                 const index = points[0].index;
                 currentData.splice(index, 1);
                 logActivity(`Removed data point at index ${index}.`);
             } else {
-                // Clicked empty area -> Add new point
                 const canvasPosition = Chart.helpers.getRelativePosition(evt, regressionChart);
                 const dataX = regressionChart.scales.x.getValueForPixel(canvasPosition.x);
                 const dataY = regressionChart.scales.y.getValueForPixel(canvasPosition.y);
@@ -1111,91 +1062,78 @@
             else updateChartsAndMetrics();
         }
 
-        // Update Chart Curves, Residuals, and Equation Readouts
+        function updateChartsAndMetrics() {
+            if (!regressionChart) return;
 
-function updateChartsAndMetrics() {
-    if (!regressionChart) return;
+            regressionChart.data.datasets[0].data = currentData;
 
-    // Update Point Data
-    regressionChart.data.datasets[0].data = currentData;
-
-    // Generate Fitted Curve Line
-    if (currentData.length > 0) {
-        const xs = currentData.map(p => p.x);
-        const minX = Math.min(...xs) - 5;
-        const maxX = Math.max(...xs) + 5;
-        const curvePts = [];
-        const steps = 60;
-        for (let i = 0; i <= steps; i++) {
-            const x = minX + (i / steps) * (maxX - minX);
-            curvePts.push({ x: x, y: predictY(x) });
-        }
-        regressionChart.data.datasets[1].data = curvePts;
-    }
-
-    regressionChart.update('none');
-
-    // Update Loss Chart
-    lossChart.data.labels = lossHistory.map((_, i) => i);
-    lossChart.data.datasets[0].data = lossHistory;
-    lossChart.update('none');
-
-    // Update Residuals Bar Chart
-    const residuals = currentData.map(p => Math.abs(p.y - predictY(p.x)));
-    residualsChart.data.labels = currentData.map((_, i) => `P${i+1}`);
-    residualsChart.data.datasets[0].data = residuals;
-    residualsChart.update('none');
-
-    // Text Readouts
-    const mse = calculateMSE();
-    const r2 = calculateR2();
-    document.getElementById('mseMetric').innerText = mse.toFixed(4);
-    document.getElementById('r2Metric').innerText = r2.toFixed(3);
-    document.getElementById('currentLossDisplay').innerText = mse.toFixed(4);
-    document.getElementById('mainEpochCount').innerText = currentEpoch;
-    document.getElementById('pointCountBadge').innerText = `${currentData.length} points`;
-
-    // Equation Display
-    let eqText = "";
-
-    if (modelFamily === 'exponential') {
-        const a = (weights[0] || 1).toFixed(2);
-        const b = (weights[1] || 0).toFixed(3);
-        eqText = `y = ${a} \\cdot e^{${b} \\cdot x}`;
-    } else {
-        // Format polynomial terms cleanly with correct +/- signs
-        const terms = weights.map((w, i) => {
-            const val = w || 0;
-            const absVal = Math.abs(val).toFixed(2);
-            const sign = val < 0 ? '-' : '+';
-            
-            let termStr = "";
-            if (i === 0) {
-                termStr = val < 0 ? `-${absVal}` : `${absVal}`;
-            } else if (i === 1) {
-                termStr = `${sign} ${absVal} \\cdot x_{\\text{std}}`;
-            } else {
-                termStr = `${sign} ${absVal} \\cdot x_{\\text{std}}^{${i}}`;
+            if (currentData.length > 0) {
+                const xs = currentData.map(p => p.x);
+                const minX = Math.min(...xs) - 5;
+                const maxX = Math.max(...xs) + 5;
+                const curvePts = [];
+                const steps = 60;
+                for (let i = 0; i <= steps; i++) {
+                    const x = minX + (i / steps) * (maxX - minX);
+                    curvePts.push({ x: x, y: predictY(x) });
+                }
+                regressionChart.data.datasets[1].data = curvePts;
             }
-            return termStr;
-        });
 
-        eqText = `y = ${terms.join(' ')}`;
-    }
+            regressionChart.update('none');
 
-    const displayEl = document.getElementById('modelEquationDisplay');
+            lossChart.data.labels = lossHistory.map((_, i) => i);
+            lossChart.data.datasets[0].data = lossHistory;
+            lossChart.update('none');
 
-    // Set text enclosed in LaTeX inline delimiters
-    displayEl.innerHTML = `\\(${eqText}\\)`;
+            const residuals = currentData.map(p => Math.abs(p.y - predictY(p.x)));
+            residualsChart.data.labels = currentData.map((_, i) => `P${i+1}`);
+            residualsChart.data.datasets[0].data = residuals;
+            residualsChart.update('none');
 
-    // Trigger MathJax typesetting asynchronously safely
-    if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-        MathJax.typesetPromise([displayEl]).catch((err) => console.log(err));
-    }
+            const mse = calculateMSE();
+            const r2 = calculateR2();
+            document.getElementById('mseMetric').innerText = mse.toFixed(4);
+            document.getElementById('r2Metric').innerText = r2.toFixed(3);
+            document.getElementById('currentLossDisplay').innerText = mse.toFixed(4);
+            document.getElementById('mainEpochCount').innerText = currentEpoch;
+            document.getElementById('pointCountBadge').innerText = `${currentData.length} points`;
 
-    runPrediction();
-}
-        // Training Loop Controller
+            let eqText = "";
+            if (modelFamily === 'exponential') {
+                const a = (weights[0] || 1).toFixed(2);
+                const b = (weights[1] || 0).toFixed(3);
+                eqText = `y = ${a} \\cdot e^{${b} \\cdot x}`;
+            } else {
+                const terms = weights.map((w, i) => {
+                    const val = w || 0;
+                    const absVal = Math.abs(val).toFixed(2);
+                    const sign = val < 0 ? '-' : '+';
+                    
+                    let termStr = "";
+                    if (i === 0) {
+                        termStr = val < 0 ? `-${absVal}` : `${absVal}`;
+                    } else if (i === 1) {
+                        termStr = `${sign} ${absVal} \\cdot x_{\\text{std}}`;
+                    } else {
+                        termStr = `${sign} ${absVal} \\cdot x_{\\text{std}}^{${i}}`;
+                    }
+                    return termStr;
+                });
+
+                eqText = `y = ${terms.join(' ')}`;
+            }
+
+            const displayEl = document.getElementById('modelEquationDisplay');
+            displayEl.innerHTML = `\\(${eqText}\\)`;
+
+            if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+                MathJax.typesetPromise([displayEl]).catch((err) => console.log(err));
+            }
+
+            runPrediction();
+        }
+
         function toggleTraining() {
             if (fitMethod === 'closed_form') {
                 setFitMethod('gd');
@@ -1322,7 +1260,7 @@ function updateChartsAndMetrics() {
 
 
         /* ==========================================================================
-           BONUS: PERCEPTRON LAB (BINARY CLASSIFICATION)
+           PERCEPTRON LAB (STABILIZED & NORMALIZED)
            ========================================================================== */
 
         let perceptronPoints = [
@@ -1384,7 +1322,32 @@ function updateChartsAndMetrics() {
                 'py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2';
         }
 
+        // Updated Perceptron Epoch Function (Normalized Scale [0, 1])
+        function stepPerceptronEpoch() {
+            if (perceptronPoints.length === 0) return true;
 
+            const lr = parseFloat(document.getElementById('percLrSlider').value);
+            let misclassified = 0;
+
+            for (let pt of perceptronPoints) {
+                // Scale coordinates from [0, 100] to [0, 1] for scale parity with bias
+                const normX = pt.x / 100;
+                const normY = pt.y / 100;
+
+                const score = pWeights[0] * normX + pWeights[1] * normY + pWeights[2];
+                const pred = score >= 0 ? 1 : -1;
+
+                if (pred !== pt.c) {
+                    misclassified++;
+                    pWeights[0] += lr * pt.c * normX;
+                    pWeights[1] += lr * pt.c * normY;
+                    pWeights[2] += lr * pt.c * 1;
+                }
+            }
+
+            percEpoch++;
+            return misclassified === 0;
+        }
 
         function togglePerceptronTraining() {
             isPerceptronTraining = !isPerceptronTraining;
@@ -1406,7 +1369,7 @@ function updateChartsAndMetrics() {
             const converged = stepPerceptronEpoch();
             updatePerceptronChart();
 
-            if (converged || percEpoch >= 200) {
+            if (converged || percEpoch >= 300) {
                 isPerceptronTraining = false;
                 document.getElementById('percTrainBtnText').innerText = "Train Perceptron Live";
                 document.getElementById('percStatus').innerText = converged ? "Separated!" : "Max Epochs";
@@ -1425,14 +1388,19 @@ function updateChartsAndMetrics() {
             perceptronChart.data.datasets[0].data = classA;
             perceptronChart.data.datasets[1].data = classB;
 
-            // Generate Boundary Line: w1*x + w2*y + b = 0 => y = (-w1*x - b) / w2
+            // Decision boundary in canvas coordinates (0-100 space):
+            // w1 * (x/100) + w2 * (y/100) + b = 0 => y = (-b - w1 * (x/100)) / w2 * 100
             const boundaryPts = [];
             const w1 = pWeights[0], w2 = pWeights[1], b = pWeights[2];
 
-            if (Math.abs(w2) > 1e-4) {
-                const y0 = (-w1 * 0 - b) / w2;
-                const y100 = (-w1 * 100 - b) / w2;
-                boundaryPts.push({x: 0, y: y0}, {x: 100, y: y100});
+            if (Math.abs(w2) > 1e-5) {
+                const y0 = (-b - w1 * 0) / w2 * 100;
+                const y100 = (-b - w1 * 1) / w2 * 100;
+                boundaryPts.push({ x: 0, y: y0 }, { x: 100, y: y100 });
+            } else if (Math.abs(w1) > 1e-5) {
+                // Vertical line fallback
+                const xVal = (-b / w1) * 100;
+                boundaryPts.push({ x: xVal, y: 0 }, { x: xVal, y: 100 });
             }
 
             perceptronChart.data.datasets[2].data = boundaryPts;
@@ -1575,7 +1543,6 @@ function updateChartsAndMetrics() {
                 }
             });
 
-            // Loop hero preview animation
             setInterval(() => {
                 heroEpoch++;
                 if (heroEpoch > 80) {
@@ -1584,7 +1551,6 @@ function updateChartsAndMetrics() {
                     heroLosses = [];
                 }
 
-                // Mini GD step
                 const n = heroData.length;
                 const xs = heroData.map(p => (p.x - 18) / 8);
                 const ys = heroData.map(p => p.y);
@@ -1601,7 +1567,6 @@ function updateChartsAndMetrics() {
                 mse /= n;
                 heroLosses.push(mse);
 
-                // Update Hero fit curve
                 const linePts = [];
                 for (let x = 5; x <= 32; x += 2) {
                     const xStdVal = (x - 18) / 8;
@@ -1621,7 +1586,6 @@ function updateChartsAndMetrics() {
             }, 80);
         }
 
-        // On Page Load Initialization
         window.onload = function() {
             initCharts();
             initPerceptronChart();
